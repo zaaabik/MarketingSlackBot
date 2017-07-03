@@ -5,11 +5,19 @@ import (
 	"github.com/nlopes/slack"
 	"github.com/radario/mbot/request"
 	"golang.org/x/net/context"
-	"github.com/radario/mbot/DB"
+	"github.com/radario/mbot/db"
 	"log"
 )
+
+
+
 type SlackBot struct {
 	botToken	string
+	database	db.Store
+}
+
+func NewBot(token string,store *db.Store) (*SlackBot){
+	return &SlackBot{token,*store}
 }
 
 func (b *SlackBot)SetToken(token string){
@@ -19,39 +27,54 @@ func (b *SlackBot)SetToken(token string){
 func (b *SlackBot)Start()  {
 	bot := slackbot.New(b.botToken)
 	toMe := bot.Messages(slackbot.DirectMessage, slackbot.DirectMention).Subrouter()
-	bot.Messages(slackbot.MessageType("c"))
-	toMe.Hear("(?i)(.get).*").MessageHandler(getHandler)
-	toMe.Hear("(?i)(.show).*").MessageHandler(showHandler)
-	toMe.Hear("(?i)(.set).*").MessageHandler(setHandler)
-	toMe.Hear("(?i)(.del).*").MessageHandler(delDbHandler)
+	toMe.Hear("(?i)(.get).*").MessageHandler(b.getHandler)
+	toMe.Hear("(?i)(.show).*").MessageHandler(b.showHandler)
+	toMe.Hear("(?i)(.set).*").MessageHandler(b.setHandler)
+	toMe.Hear("(?i)(.del).*").MessageHandler(b.delDbHandler)
 	bot.Run()
 }
 
-func showHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
-	DB.ShowDb()
+func (b *SlackBot)showHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
+	b.database.GetAll()
 }
 
-func getHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent)  {
+func (b *SlackBot)getHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent)  {
 	request:= request.Request{RequestBody:evt.Text,User:evt.User}
-	response,err := request.Send()
+	err := request.Send()
 	if err != nil{
 		log.Println(err)
 		bot.Reply(evt,err.Error(),slackbot.WithTyping)
+		return
 	}
-	bot.Reply(evt,response,slackbot.WithTyping)
+	enc, err := request.Encode()
+	if err != nil {
+		log.Println(enc)
+		bot.Reply(evt, err.Error(), slackbot.WithTyping)
+		return
+	}
+	b.database.Save(enc)
+	bot.Reply(evt,request.Response,slackbot.WithTyping)
 }
 
-func setHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent)  {
+func (b *SlackBot)setHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent)  {
 	request:= request.Request{User:evt.User,RequestBody:evt.Text}
-	response,err := request.Send()
+	err := request.Send()
 	if err != nil{
 		log.Println(err)
 		bot.Reply(evt,err.Error(),slackbot.WithoutTyping)
+		return
 	}
-	bot.Reply(evt,response,slackbot.WithTyping)
+	enc, err := request.Encode()
+	if err != nil{
+		log.Println(enc)
+		bot.Reply(evt,err.Error(),slackbot.WithTyping)
+		return
+	}
+	b.database.Save(enc)
+	bot.Reply(evt,request.Response,slackbot.WithTyping)
 }
 
-func delDbHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent)  {
-	DB.DeleteDb()
+func (b *SlackBot)delDbHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent)  {
+	b.database.DeleteAll()
 	bot.Reply(evt,"db has been deleted",slackbot.WithoutTyping)
 }

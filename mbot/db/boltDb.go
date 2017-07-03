@@ -1,4 +1,4 @@
-package DB
+package db
 
 import (
 	"github.com/boltdb/bolt"
@@ -8,12 +8,18 @@ import (
 )
 
 
-const dbName string = "requestHistory.db"
 const dbBucket string = "request"
 
-func Save(enc []byte){
+type BoltDb struct {
+	dbPath string
+}
 
-	db, err := bolt.Open(dbName,0600,nil)
+func NewBoltDb(path string) (*BoltDb) {
+	return &BoltDb{path}
+}
+
+func (b *BoltDb)Save(enc []byte){
+	db, err := bolt.Open(b.dbPath,0600,nil)
 	defer db.Close()
 	if err != nil{
 		log.Println(err)
@@ -37,8 +43,8 @@ func Save(enc []byte){
 	}
 
 }
-func ShowDb(){
-	db, err := bolt.Open(dbName,0600,nil)
+func (b *BoltDb)GetAll(){
+	db, err := bolt.Open(b.dbPath,0600,nil)
 	if err != nil{
 		log.Println(err)
 		return
@@ -66,8 +72,8 @@ func ShowDb(){
 	}
 }
 
-func DeleteDb(){
-	db, err := bolt.Open(dbName,0600,nil)
+func (b *BoltDb)DeleteAll(){
+	db, err := bolt.Open(b.dbPath,0600,nil)
 	if err != nil{
 		log.Println(err)
 	}

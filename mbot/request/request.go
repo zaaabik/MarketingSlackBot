@@ -2,7 +2,6 @@ package request
 
 import (
 	"encoding/json"
-	"github.com/radario/mbot/DB"
 	"errors"
 )
 
@@ -17,22 +16,20 @@ type Request struct {
 
 
 
-func (request *Request)Send()(string,error){
+func (request *Request)Send()(error){
 	//test data
-	answerFromServer := "test"
+	answerFromServer := request.RequestBody
 
 
 	if(&(answerFromServer) == nil){
-		return answerFromServer, errors.New("server doesn't respond")
+		return errors.New("server doesn't respond")
 	}
 	request.Response = answerFromServer
-	enc, err := request.Encode()
+	_, err := request.Encode()
 	if err != nil{
-		return "",err
+		return err
 	}
-	DB.Save(enc)
-
-	return answerFromServer,nil
+	return nil
 }
 
 func (r *Request)Encode() ([]byte,error)  {
