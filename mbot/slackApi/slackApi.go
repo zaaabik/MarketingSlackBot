@@ -3,9 +3,9 @@ package slackApi
 import (
 	"github.com/adampointer/go-slackbot"
 	"github.com/nlopes/slack"
-	"github.com/radario/mbot/request"
+	"github.com/radario/MarketingSlackBot/mbot/request"
 	"golang.org/x/net/context"
-	"github.com/radario/mbot/db"
+	"github.com/radario/MarketingSlackBot/mbot/db"
 	"log"
 )
 

@@ -3,8 +3,8 @@ package main
 
 import (
 	flags "github.com/jessevdk/go-flags"
-	"github.com/radario/mbot/slackApi"
-	"github.com/radario/mbot/db"
+	"github.com/radario/MarketingSlackBot/mbot/slackApi"
+	"github.com/radario/MarketingSlackBot/mbot/db"
 )
 
 var config struct{
