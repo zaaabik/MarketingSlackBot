@@ -3,9 +3,9 @@ package slackApi
 import (
 	"github.com/adampointer/go-slackbot"
 	"github.com/nlopes/slack"
-	"github.com/radario/MarketingSlackBot/mbot/request"
+	"github.com/radario/marketingstatbot/mbot/request"
 	"golang.org/x/net/context"
-	"github.com/radario/MarketingSlackBot/mbot/db"
+	"github.com/radario/marketingstatbot/mbot/db"
 	"log"
 )
 
@@ -26,6 +26,7 @@ func (b *SlackBot)SetToken(token string){
 
 func (b *SlackBot)Start()  {
 	bot := slackbot.New(b.botToken)
+
 	toMe := bot.Messages(slackbot.DirectMessage, slackbot.DirectMention).Subrouter()
 	toMe.Hear("(?i)(.get).*").MessageHandler(b.getHandler)
 	toMe.Hear("(?i)(.show).*").MessageHandler(b.showHandler)
