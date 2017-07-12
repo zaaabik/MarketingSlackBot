@@ -8,7 +8,7 @@ import (
 )
 
 
-const dbBucket string = "request"
+const dbBucket string = "marketingClient"
 
 type BoltDb struct {
 	dbPath string

@@ -5,6 +5,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 	"github.com/radario/marketingstatbot/mbot/slackApi"
 	"github.com/radario/marketingstatbot/mbot/db"
+	"github.com/radario/marketingstatbot/mbot/marketingClient"
 )
 
 var config struct{
@@ -20,6 +21,7 @@ func main()  {
 	flags.Parse(&config)
 	var database db.Store
 	database = db.NewBoltDb(config.Path)
-	bot:= slackApi.NewBot(config.Token, &database,config.HttpAddress,config.HttpToken)
+	client := marketingClient.NewMarketingCliet(config.HttpAddress, config.HttpToken)
+	bot:= slackApi.NewBot(config.Token, &database,client)
 	bot.Start()
 }
