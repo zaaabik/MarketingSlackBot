@@ -3,25 +3,29 @@ package slackApi
 
 import (
 	"encoding/json"
-_	"fmt"
-	"github.com/radario/marketingstatbot/mbot/webHookHandler"
+
+	_ "fmt"
 	"github.com/adampointer/go-slackbot"
 	"github.com/nlopes/slack"
 	"github.com/radario/marketingstatbot/mbot/db"
 	"github.com/radario/marketingstatbot/mbot/marketingClient"
+	"github.com/radario/marketingstatbot/mbot/webHookHandler"
 	"golang.org/x/net/context"
 	"log"
 	"strings"
+
 )
 
 type SlackBot struct {
+	server   *webHookHandler.WebHook
 	botToken string
 	database db.Store
 	client   *marketingClient.MarketingClient
 }
 
 func NewBot(botToken string, store *db.Store, client *marketingClient.MarketingClient) *SlackBot {
-	return &SlackBot{botToken, *store, client}
+
+	return &SlackBot{server: webHookHandler.NewWebHookHandler(), botToken: botToken, database: *store, client: client}
 }
 
 func (b *SlackBot) SetToken(token string) {
@@ -29,15 +33,16 @@ func (b *SlackBot) SetToken(token string) {
 }
 
 func (b *SlackBot) Start() {
-
 	bot := slackbot.New(b.botToken)
-
+	b.server = webHookHandler.NewWebHookHandler()
+	go b.server.Start()
 	toMe := bot.Messages(slackbot.DirectMessage, slackbot.DirectMention).Subrouter()
 	toMe.Hear("(?i)(.get trans count).*").MessageHandler(b.getTransactionCountHandler)
 	toMe.Hear("(?i)(.get user count).*").MessageHandler(b.getUserCountHandler)
 	toMe.Hear("(?i)(.show).*").MessageHandler(b.showHandler)
 	toMe.Hear("(?i)(.del).*").MessageHandler(b.delDbHandler)
 	bot.Run()
+
 }
 
 func (b *SlackBot) showHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
@@ -50,8 +55,8 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
-	m["provider"] = args[len(args) - 1]
-	m["user_id"] = args[len(args) - 2]
+	m["provider"] = args[len(args)-1]
+	m["user_id"] = args[len(args)-2]
 
 	okAction := slack.AttachmentAction{
 		Text:  "yes",
@@ -65,7 +70,7 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 		Name:  "cancel",
 		Value: "no",
 	}
-	str := "Do you want to get user count of " +m["user_id"]+ m["provide"] + "?"
+	str := "Do you want to get user count of " + m["user_id"] + m["provide"] + "?"
 	attach := slack.Attachment{
 		Title:      str,
 		Actions:    []slack.AttachmentAction{okAction, cancelAction},
@@ -75,25 +80,22 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 	attachments := []slack.Attachment{attach}
 	bot.ReplyWithAttachments(evt, attachments, slackbot.WithoutTyping)
 
-	var res chan string
-
-
-	go webHookHandler.WebHookHandler(res)
-
-
 	select {
-	case tmp := <-res:
-		if tmp == "yes"{
+	case tmp := <-b.server.Callback:
+		if tmp {
 			response, err := b.client.GetTransactionCount(m["user_id"], m["provider"])
-			if err != nil{
-				bot.Reply(evt,err.Error(),slackbot.WithoutTyping)
+			enc, err := json.Marshal(response)
+			if err != nil {
+				log.Println(enc)
+				bot.Reply(evt, err.Error(), slackbot.WithTyping)
+				return
 			}
+			b.database.Save(enc)
 			bot.Reply(evt,response,slackbot.WithoutTyping)
-
-		}else {
-
 		}
 	}
+
+	//fmt.Println(<-b.server.Callback)
 	enc, err := json.Marshal(m)
 	if err != nil {
 		log.Println(enc)

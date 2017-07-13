@@ -10,8 +10,9 @@ type MarketingClient struct {
 	baseApiUrl string
 	httpToken  string
 }
-func NewMarketingCliet(apiUrl,token string)(*MarketingClient){
-	return &MarketingClient{apiUrl,token}
+
+func NewMarketingCliet(apiUrl, token string) *MarketingClient {
+	return &MarketingClient{apiUrl, token}
 }
 func (client *MarketingClient) GetUserCount(userId string, provider string) (string, error) {
 	const method = "/getUserCount"
@@ -27,8 +28,8 @@ func (client *MarketingClient) GetUserCount(userId string, provider string) (str
 	req.URL.RawQuery = q.Encode()
 	log.Println(req.URL.String())
 	response, err := http.DefaultClient.Do(req)
-	if err != nil{
-		return "",err
+	if err != nil {
+		return "", err
 	}
 
 	body, err := ioutil.ReadAll(response.Body)
