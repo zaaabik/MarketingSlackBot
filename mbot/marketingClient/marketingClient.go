@@ -11,9 +11,10 @@ type MarketingClient struct {
 	httpToken  string
 }
 
-func NewMarketingCliet(apiUrl, token string) *MarketingClient {
+func NewMarketingClient(apiUrl, token string) *MarketingClient {
 	return &MarketingClient{apiUrl, token}
 }
+
 func (client *MarketingClient) GetUserCount(userId string, provider string) (string, error) {
 	const method = "/getUserCount"
 	req, err := http.NewRequest("GET", client.baseApiUrl+method, nil)

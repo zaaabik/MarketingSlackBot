@@ -3,8 +3,6 @@ package slackApi
 
 import (
 	"encoding/json"
-
-	_ "fmt"
 	"github.com/adampointer/go-slackbot"
 	"github.com/nlopes/slack"
 	"github.com/radario/marketingstatbot/mbot/db"
@@ -13,7 +11,6 @@ import (
 	"golang.org/x/net/context"
 	"log"
 	"strings"
-
 )
 
 type SlackBot struct {
@@ -52,7 +49,7 @@ func (b *SlackBot) showHandler(ctx context.Context, bot *slackbot.Bot, evt *slac
 
 //return count of transaction of client
 func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
-
+	log.Println("trCou")
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
 	m["provider"] = args[len(args)-1]
@@ -82,8 +79,11 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 
 	select {
 	case tmp := <-b.server.Callback:
-		if tmp {
+		if tmp == "yes" {
+
 			response, err := b.client.GetTransactionCount(m["user_id"], m["provider"])
+			m["request"] = "getTransactionCount"
+			m["response"] = response
 			enc, err := json.Marshal(response)
 			if err != nil {
 				log.Println(enc)
@@ -91,51 +91,73 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 				return
 			}
 			b.database.Save(enc)
-			bot.Reply(evt,response,slackbot.WithoutTyping)
+			bot.Reply(evt, "<@"+evt.User+"> "+response, slackbot.WithoutTyping)
+		} else if tmp == "no" {
+			return
+		} else {
+			log.Println("webhook isnt correct")
+			return
 		}
 	}
-
-	//fmt.Println(<-b.server.Callback)
-	enc, err := json.Marshal(m)
-	if err != nil {
-		log.Println(enc)
-		bot.Reply(evt, err.Error(), slackbot.WithTyping)
-		return
-	}
-	b.database.Save(enc)
-	//bot.Reply(evt, response,slackbot.WithTyping)
 
 }
 
 //return count of user of client
 func (b *SlackBot) getUserCountHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 
-	args := evt.Text[15:]
-	params := strings.Fields(args)
-	if len(params) != 2 {
-		bot.Reply(evt, "wrong arguments", slackbot.WithTyping)
-		bot.Reply(evt, "arg1 host_id, arg2=provider", slackbot.WithTyping)
-		return
-	}
-	response, err := b.client.GetUserCount(params[0], params[1])
-	if err != nil {
-		log.Println(err)
-		bot.Reply(evt, err.Error(), slackbot.WithoutTyping)
-		return
+
+	args := strings.Fields(evt.Text)
+	m := make(map[string]string)
+	m["provider"] = args[len(args)-1]
+	m["user_id"] = args[len(args)-2]
+	select {
+	case tmp := <-b.server.Callback:
+		log.Println("eee")
+		if tmp == "yes" {
+
+			response, err := b.client.GetUserCount(m["user_id"], m["provider"])
+			m["request"] = "getTransactionCount"
+			m["response"] = response
+			enc, err := json.Marshal(response)
+			if err != nil {
+				log.Println(enc)
+				bot.Reply(evt, err.Error(), slackbot.WithTyping)
+				return
+			}
+			b.database.Save(enc)
+			bot.Reply(evt, "<@"+evt.User+"> "+response, slackbot.WithoutTyping)
+		} else if tmp == "no" {
+			return
+		} else {
+			log.Println("webhook isnt correct")
+			return
+		}
 	}
 
-	m := make(map[string]string)
-	m["host_id"] = params[0]
-	m["provider"] = params[1]
-	m["response"] = response
-	enc, _ := json.Marshal(m)
-	if err != nil {
-		log.Println(enc)
-		bot.Reply(evt, err.Error(), slackbot.WithTyping)
-		return
+	okAction := slack.AttachmentAction{
+		Text:  "yes",
+		Type:  "button",
+		Name:  "submit",
+		Value: "yes",
 	}
-	b.database.Save(enc)
-	bot.Reply(evt, response, slackbot.WithTyping)
+	cancelAction := slack.AttachmentAction{
+		Text:  "no",
+		Type:  "button",
+		Name:  "cancel",
+		Value: "no",
+	}
+	str := "Do you want to get user count of " + m["user_id"] + m["provide"] + "?"
+	attach := slack.Attachment{
+		Title:      str,
+		Actions:    []slack.AttachmentAction{okAction, cancelAction},
+		CallbackID: "get_transaction_count",
+	}
+
+	attachments := []slack.Attachment{attach}
+	bot.ReplyWithAttachments(evt, attachments, slackbot.WithoutTyping)
+
+
+
 }
 
 //delete all data from database
