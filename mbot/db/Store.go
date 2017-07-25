@@ -1,7 +1,7 @@
 package db
 
 type Store interface {
-	Save([]byte)
+	Save(map[string]string)
 	GetAll()
 	DeleteAll()
 }

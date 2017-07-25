@@ -5,6 +5,7 @@ import (
 	"github.com/boltdb/bolt"
 	"log"
 	"time"
+	"encoding/json"
 )
 
 const dbBucket string = "marketingClient"
@@ -17,11 +18,17 @@ func NewBoltDb(path string) *BoltDb {
 	return &BoltDb{path}
 }
 
-func (b *BoltDb) Save(enc []byte) {
+func (b *BoltDb) Save(m map[string]string) {
 	db, err := bolt.Open(b.dbPath, 0600, nil)
 	defer db.Close()
 	if err != nil {
 		log.Println(err)
+	}
+
+	enc, err := json.Marshal(m)
+	if err != nil{
+		log.Print(err)
+		return
 	}
 
 	err = db.Update(func(tx *bolt.Tx) error {

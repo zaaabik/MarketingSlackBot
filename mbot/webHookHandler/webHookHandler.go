@@ -4,18 +4,22 @@ import (
 	"encoding/json"
 	"github.com/go-chi/chi"
 	"github.com/nlopes/slack"
+	"github.com/radario/MarketingSlackBot/mbot/callbackValueJson"
+	"github.com/radario/MarketingSlackBot/mbot/marketingClient"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"log"
+	"fmt"
 )
 
 type WebHook struct {
-	Callback chan string
+	client *marketingClient.MarketingClient
 }
 
-func NewWebHookHandler()(*WebHook){
-	return &WebHook{make(chan string,3)}
+func NewWebHookHandler(client *marketingClient.MarketingClient) *WebHook {
+	return &WebHook{client}
 }
 
 type j struct {
@@ -26,26 +30,31 @@ func (web WebHook) Start() {
 	r := chi.NewRouter()
 	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
 		res, _ := ioutil.ReadAll(r.Body)
-		log.Println(string(res))
 		if len(res) < 8 {
-			web.Callback <- "error"
-			close(web.Callback)
+
 		} else {
 			jsonStr, _ := url.QueryUnescape(string(res)[8:])
 			var s slack.AttachmentActionCallback
 			json.Unmarshal([]byte(jsonStr), &s)
-			web.Callback <- s.Actions[0].Value
-			if s.Actions[0].Value == "no"{
-				res := "CANCEL"
-
-				w.Write([]byte(res))
-			} else {
-				res := "ACCEPT"
-				w.Write([]byte(res))
+			fmt.Println(s.CallbackID)
+			switch s.CallbackID {
+			case "user/letters_count":
+				{
+					log.Print("user/letters_count")
+					web.userLettersCount(s.Actions[0].Value)
+				}
 
 			}
 
 		}
 	})
 	http.ListenAndServe(":1113", r)
+}
+
+func (web WebHook) userLettersCount(value string) (string, error) {
+	var valueJson callbackValueJson.UserLettersCount
+	json.Unmarshal([]byte(value), &valueJson)
+	lettersCountInt, err := strconv.Atoi(valueJson.LettersCount)
+	response, err := web.client.AddLettersTohost(valueJson.HostId, valueJson.Provider, lettersCountInt)
+	return response, err
 }
