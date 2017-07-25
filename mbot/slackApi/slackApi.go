@@ -4,9 +4,9 @@ package slackApi
 import (
 	"github.com/adampointer/go-slackbot"
 	"github.com/nlopes/slack"
-	"github.com/radario/marketingstatbot/mbot/db"
-	"github.com/radario/marketingstatbot/mbot/marketingClient"
-	"github.com/radario/marketingstatbot/mbot/webHookHandler"
+	"github.com/radario/MarketingSlackBot/mbot/db"
+	"github.com/radario/MarketingSlackBot/mbot/marketingClient"
+	"github.com/radario/MarketingSlackBot/mbot/webHookHandler"
 	"golang.org/x/net/context"
 	"strings"
 	"log"

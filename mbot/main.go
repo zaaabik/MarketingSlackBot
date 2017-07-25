@@ -2,9 +2,9 @@ package main
 
 import (
 	flags "github.com/jessevdk/go-flags"
-	"github.com/radario/marketingstatbot/mbot/db"
-	"github.com/radario/marketingstatbot/mbot/marketingClient"
-	"github.com/radario/marketingstatbot/mbot/slackApi"
+	"github.com/radario/MarketingSlackBot/mbot/db"
+	"github.com/radario/MarketingSlackBot/mbot/marketingClient"
+	"github.com/radario/MarketingSlackBot/mbot/slackApi"
 )
 
 var config struct {
