@@ -20,7 +20,6 @@ type SlackBot struct {
 }
 
 func NewBot(botToken string, store *db.Store, client *marketingClient.MarketingClient) *SlackBot {
-
 	return &SlackBot{server: webHookHandler.NewWebHookHandler(), botToken: botToken, database: *store, client: client}
 
 }
@@ -34,8 +33,8 @@ func (b *SlackBot) Start() {
 	b.server = webHookHandler.NewWebHookHandler()
 	go b.server.Start()
 	toMe := bot.Messages(slackbot.DirectMessage, slackbot.DirectMention).Subrouter()
-	toMe.Hear("(?i)(.get trans count).*").MessageHandler(b.getTransactionCountHandler)
-	toMe.Hear("(?i)(.get user count).*").MessageHandler(b.getUserCountHandler)
+	toMe.Hear("(?i)(.get transaction count).*").MessageHandler(b.getTransactionCountHandler)
+	toMe.Hear("(?i)(.get customers count).*").MessageHandler(b.getUserCountHandler)
 	toMe.Hear("(?i)(.show).*").MessageHandler(b.showHandler)
 	toMe.Hear("(?i)(.del).*").MessageHandler(b.delDbHandler)
 	bot.Run()
@@ -47,7 +46,6 @@ func (b *SlackBot) showHandler(ctx context.Context, bot *slackbot.Bot, evt *slac
 	b.database.GetAll()
 }
 
-//return count of transaction of client
 func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
@@ -62,6 +60,7 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 		return
 	}
 
+
 	bot.Reply(evt, response,slackbot.WithoutTyping)
 }
 
@@ -74,6 +73,9 @@ func (b *SlackBot) getUserCountHandler(ctx context.Context, bot *slackbot.Bot, e
 	response, err := b.client.GetUserCount(hostId,provider)
 	if err != nil{
 		return
+	}
+	if response == ""{
+		bot.Reply(evt, "user doesnt exist" ,slackbot.WithoutTyping)
 	}
 	bot.Reply(evt,response,slackbot.WithoutTyping)
 }
@@ -106,7 +108,6 @@ func (b *SlackBot) addLettersToUser(ctx context.Context, bot *slackbot.Bot, evt 
 	bot.ReplyWithAttachments(evt,[]slack.Attachment{attach},slackbot.WithoutTyping)
 }
 
-//delete all data from database
 func (b *SlackBot) delDbHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	b.database.DeleteAll()
 	bot.Reply(evt, "db has been deleted", slackbot.WithoutTyping)

@@ -34,33 +34,14 @@ func (web WebHook) Start() {
 			close(web.Callback)
 		} else {
 			jsonStr, _ := url.QueryUnescape(string(res)[8:])
-			rand.Seed(time.Now().UTC().UnixNano())
 			var s slack.AttachmentActionCallback
 			json.Unmarshal([]byte(jsonStr), &s)
 			web.Callback <- s.Actions[0].Value
 			if s.Actions[0].Value == "no"{
-				attach := slack.Attachment{
-					Text:"Cancel!",
-					Color:"#FF2D00",
-				}
-				attachList := j{
-					Value:[]slack.Attachment{attach},
-				}
-				js,_:= json.Marshal(attachList)
-				_ = js
 				res := "CANCEL"
 
 				w.Write([]byte(res))
 			} else {
-				attach := slack.Attachment{
-					Text:"Accept!",
-					Color:"#FF2D00",
-				}
-				attachList := j{
-					Value:[]slack.Attachment{attach},
-				}
-				js,_:= json.Marshal(attachList)
-				_ = js
 				res := "ACCEPT"
 				w.Write([]byte(res))
 
