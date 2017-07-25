@@ -5,7 +5,6 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/nlopes/slack"
 	"io/ioutil"
-
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -26,11 +25,8 @@ type j struct {
 }
 
 func (web WebHook) Start() {
-	log.Println("bot start")
 	r := chi.NewRouter()
 	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
-
-
 		res, _ := ioutil.ReadAll(r.Body)
 		log.Println(string(res))
 		if len(res) < 8 {
@@ -51,8 +47,9 @@ func (web WebHook) Start() {
 					Value:[]slack.Attachment{attach},
 				}
 				js,_:= json.Marshal(attachList)
-				res := url.QueryEscape(string(js))
-				res = "payload="+ res
+				_ = js
+				res := "CANCEL"
+
 				w.Write([]byte(res))
 			} else {
 				attach := slack.Attachment{
@@ -63,10 +60,9 @@ func (web WebHook) Start() {
 					Value:[]slack.Attachment{attach},
 				}
 				js,_:= json.Marshal(attachList)
-				res := url.QueryEscape(string(js))
-				res = "payload="+ res
+				_ = js
+				res := "ACCEPT"
 				w.Write([]byte(res))
-
 
 			}
 

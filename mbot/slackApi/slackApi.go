@@ -2,15 +2,14 @@
 package slackApi
 
 import (
-	"encoding/json"
 	"github.com/adampointer/go-slackbot"
 	"github.com/nlopes/slack"
 	"github.com/radario/marketingstatbot/mbot/db"
 	"github.com/radario/marketingstatbot/mbot/marketingClient"
 	"github.com/radario/marketingstatbot/mbot/webHookHandler"
 	"golang.org/x/net/context"
-	"log"
 	"strings"
+	"log"
 )
 
 type SlackBot struct {
@@ -23,6 +22,7 @@ type SlackBot struct {
 func NewBot(botToken string, store *db.Store, client *marketingClient.MarketingClient) *SlackBot {
 
 	return &SlackBot{server: webHookHandler.NewWebHookHandler(), botToken: botToken, database: *store, client: client}
+
 }
 
 func (b *SlackBot) SetToken(token string) {
@@ -49,90 +49,41 @@ func (b *SlackBot) showHandler(ctx context.Context, bot *slackbot.Bot, evt *slac
 
 //return count of transaction of client
 func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
-	log.Println("trCou")
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
+	log.Println(m)
+	log.Println(args)
 	m["provider"] = args[len(args)-1]
-	m["user_id"] = args[len(args)-2]
+	m["host_id"] = args[len(args)-2]
 
-	okAction := slack.AttachmentAction{
-		Text:  "yes",
-		Type:  "button",
-		Name:  "submit",
-		Value: "yes",
-	}
-	cancelAction := slack.AttachmentAction{
-		Text:  "no",
-		Type:  "button",
-		Name:  "cancel",
-		Value: "no",
-	}
-	str := "Do you want to get user count of " + m["user_id"] + m["provide"] + "?"
-	attach := slack.Attachment{
-		Title:      str,
-		Actions:    []slack.AttachmentAction{okAction, cancelAction},
-		CallbackID: "get_transaction_count",
+	response, err := b.client.GetTransactionCount(m["host_id"],m["provider"])
+	log.Print(response)
+	if err != nil{
+		return
 	}
 
-	attachments := []slack.Attachment{attach}
-	bot.ReplyWithAttachments(evt, attachments, slackbot.WithoutTyping)
-
-	select {
-	case tmp := <-b.server.Callback:
-		if tmp == "yes" {
-
-			response, err := b.client.GetTransactionCount(m["user_id"], m["provider"])
-			m["request"] = "getTransactionCount"
-			m["response"] = response
-			enc, err := json.Marshal(response)
-			if err != nil {
-				log.Println(enc)
-				bot.Reply(evt, err.Error(), slackbot.WithTyping)
-				return
-			}
-			b.database.Save(enc)
-			bot.Reply(evt, "<@"+evt.User+"> "+response, slackbot.WithoutTyping)
-		} else if tmp == "no" {
-			return
-		} else {
-			log.Println("webhook isnt correct")
-			return
-		}
-	}
-
+	bot.Reply(evt, response,slackbot.WithoutTyping)
 }
 
-//return count of user of client
 func (b *SlackBot) getUserCountHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 
+	args := strings.Fields(evt.Text)
+	provider := args[len(args) - 1]
+	hostId   := args[len(args)-2]
 
+	response, err := b.client.GetUserCount(hostId,provider)
+	if err != nil{
+		return
+	}
+	bot.Reply(evt,response,slackbot.WithoutTyping)
+}
+
+func (b *SlackBot) addLettersToUser(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent){
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
-	m["provider"] = args[len(args)-1]
-	m["user_id"] = args[len(args)-2]
-	select {
-	case tmp := <-b.server.Callback:
-		log.Println("eee")
-		if tmp == "yes" {
-
-			response, err := b.client.GetUserCount(m["user_id"], m["provider"])
-			m["request"] = "getTransactionCount"
-			m["response"] = response
-			enc, err := json.Marshal(response)
-			if err != nil {
-				log.Println(enc)
-				bot.Reply(evt, err.Error(), slackbot.WithTyping)
-				return
-			}
-			b.database.Save(enc)
-			bot.Reply(evt, "<@"+evt.User+"> "+response, slackbot.WithoutTyping)
-		} else if tmp == "no" {
-			return
-		} else {
-			log.Println("webhook isnt correct")
-			return
-		}
-	}
+	m["lettersCount"] = args[len(args) - 1]
+	m["provider"] = args[len(args)-2]
+	m["user_id"] = args[len(args)-3]
 
 	okAction := slack.AttachmentAction{
 		Text:  "yes",
@@ -152,12 +103,7 @@ func (b *SlackBot) getUserCountHandler(ctx context.Context, bot *slackbot.Bot, e
 		Actions:    []slack.AttachmentAction{okAction, cancelAction},
 		CallbackID: "get_transaction_count",
 	}
-
-	attachments := []slack.Attachment{attach}
-	bot.ReplyWithAttachments(evt, attachments, slackbot.WithoutTyping)
-
-
-
+	bot.ReplyWithAttachments(evt,[]slack.Attachment{attach},slackbot.WithoutTyping)
 }
 
 //delete all data from database

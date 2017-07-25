@@ -2,8 +2,8 @@ package marketingClient
 
 import (
 	"io/ioutil"
-	"log"
 	"net/http"
+	"log"
 )
 
 type MarketingClient struct {
@@ -16,18 +16,18 @@ func NewMarketingClient(apiUrl, token string) *MarketingClient {
 }
 
 func (client *MarketingClient) GetUserCount(userId string, provider string) (string, error) {
-	const method = "/getUserCount"
+	const method = "customers/count"
 	req, err := http.NewRequest("GET", client.baseApiUrl+method, nil)
 	if err != nil {
 		return "", err
 	}
 
-	req.Header.Add("SECURITY", client.httpToken)
+	req.Header.Add("X-MARKETING-SECURITY", client.httpToken)
 	q := req.URL.Query()
 	q.Add("host_id", userId)
 	q.Add("provider", provider)
 	req.URL.RawQuery = q.Encode()
-	log.Println(req.URL.String())
+	log.Print(req.URL)
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", err
@@ -40,23 +40,25 @@ func (client *MarketingClient) GetUserCount(userId string, provider string) (str
 	}
 
 	return string(body), nil
-
 }
 
 func (client *MarketingClient) GetTransactionCount(userId string, provider string) (string, error) {
-	const method = "/getTransactionCount"
-	req, err := http.NewRequest("GET", client.baseApiUrl+method, nil)
+	const method = "customer_transactions/count"
+	req, err := http.NewRequest("GET", client.baseApiUrl + method, nil)
 	if err != nil {
 		return "", err
 	}
 
-	req.Header.Add("SECURITY", client.httpToken)
+	req.Header.Add("X-MARKETING-SECURITY", client.httpToken)
 	q := req.URL.Query()
 	q.Add("host_id", userId)
 	q.Add("provider", provider)
 	req.URL.RawQuery = q.Encode()
-	log.Println(req.URL.String())
+	log.Print(q)
 	response, err := http.DefaultClient.Do(req)
+	if err != nil{
+		return "",err
+	}
 
 	body, err := ioutil.ReadAll(response.Body)
 
