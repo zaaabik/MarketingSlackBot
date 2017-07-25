@@ -5,10 +5,8 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/nlopes/slack"
 	"io/ioutil"
-	"math/rand"
 	"net/http"
 	"net/url"
-	"time"
 	"log"
 )
 
