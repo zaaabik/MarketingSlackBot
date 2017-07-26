@@ -11,6 +11,7 @@ import (
 	"github.com/radario/MarketingSlackBot/mbot/webHookHandler"
 	"golang.org/x/net/context"
 	"strings"
+	"fmt"
 )
 
 type SlackBot struct {
@@ -21,7 +22,7 @@ type SlackBot struct {
 }
 
 func NewBot(botToken string, store *db.Store, client *marketingClient.MarketingClient) *SlackBot {
-	return &SlackBot{server: webHookHandler.NewWebHookHandler(client), botToken: botToken, database: *store, client: client}
+	return &SlackBot{server: webHookHandler.NewWebHookHandler(client, *store), botToken: botToken, database: *store, client: client}
 
 }
 
@@ -33,17 +34,25 @@ func (b *SlackBot) Start() {
 	bot := slackbot.New(b.botToken)
 	go b.server.Start()
 	toMe := bot.Messages(slackbot.DirectMessage, slackbot.DirectMention).Subrouter()
-	toMe.Hear("(?i)(.add)(.*)(letters).*").MessageHandler(b.addLettersToUser)
-	toMe.Hear("(?i)(.get transaction count).*").MessageHandler(b.getTransactionCountHandler)
-	toMe.Hear("(?i)(.get customers count).*").MessageHandler(b.getUserCountHandler)
-	toMe.Hear("(?i)(.show).*").MessageHandler(b.showHandler)
-	toMe.Hear("(?i)(.del).*").MessageHandler(b.delDbHandler)
+	toMe.Hear(`((<@\d+>\s*)+|(^\s*))(\.add \d* letters \w+ \w+\s*$)`).MessageHandler(b.addLettersToUser)
+	toMe.Hear(`((<@\d+>\s*)+|(^\s*))(\.get transaction count \w+ \w+\s*$)`).MessageHandler(b.getTransactionCountHandler)
+	toMe.Hear(`((<@\d+>\s*)+|(^\s*))(\.get customers count \w+ \w+\s*$)`).MessageHandler(b.getUserCountHandler)
+	toMe.Hear(".show").MessageHandler(b.showHandler)
+	toMe.Hear(".del").MessageHandler(b.delDbHandler)
+	toMe.Hear(".*").MessageHandler(b.test)
 	bot.Run()
 }
 
 func (b *SlackBot) showHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
-
 	b.database.GetAll()
+}
+
+func (b *SlackBot) test(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
+	fmt.Println(evt.BotID)
+	fmt.Println(evt.User)
+	if evt.User != bot.BotUserID() {
+		bot.Reply(evt, "test", slackbot.WithoutTyping)
+	}
 }
 
 func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
@@ -59,7 +68,7 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 	}
 	m["response"] = response
 	m["user"] = evt.User
-	//b.database.Save(m)
+	b.database.Save(m)
 	bot.Reply(evt, "<@"+evt.User+"> "+response, slackbot.WithoutTyping)
 }
 
@@ -79,17 +88,17 @@ func (b *SlackBot) getUserCountHandler(ctx context.Context, bot *slackbot.Bot, e
 	}
 	m["response"] = response
 	m["user"] = evt.User
-	//b.database.Save(m)
+	b.database.Save(m)
 	bot.Reply(evt, "<@"+evt.User+"> "+response, slackbot.WithoutTyping)
 }
 
 func (b *SlackBot) addLettersToUser(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
-	m["lettersCount"] = args[len(args)-5]
+	m["lettersCount"] = args[len(args)-4]
 	m["provider"] = args[len(args)-1]
 	m["host_id"] = args[len(args)-2]
-	//b.client.AddLettersTohost(m["host_id"], m["provider"], 1)
+
 	value := callbackValueJson.UserLettersCount{m["host_id"], m["provider"], m["lettersCount"]}
 	jsonValue, err := json.Marshal(value)
 	_ = err

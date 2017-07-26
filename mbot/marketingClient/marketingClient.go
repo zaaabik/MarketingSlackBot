@@ -69,9 +69,9 @@ func (client *MarketingClient) GetTransactionCount(userId string, provider strin
 
 	return string(body), nil
 }
-func (client *MarketingClient) AddLettersTohost(userId string, provider string, lettersCount string) (string, error) {
-	//const method = "user/letters_count"
-	const method = ""
+func (client *MarketingClient) AddLettersTohost(userId string, provider string, lettersCount string) (int,error) {
+	const method = "user/letters_count"
+	//const method = ""
 	form := url.Values{}
 	form.Set("host_id", userId)
 	form.Set("provider", provider)
@@ -85,25 +85,16 @@ func (client *MarketingClient) AddLettersTohost(userId string, provider string, 
 	req, err := http.NewRequest("PATCH", client.baseApiUrl+method, buffer)
 	if err != nil {
 		log.Print(err)
-		return "", err
+		return http.StatusOK,err
 	}
 
 	req.Header.Add("X-MARKETING-SECURITY", client.httpToken)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Println("")
-		log.Println(err)
-		log.Println("")
-		return "", err
+		return 0,err
 	}
+	return response.StatusCode,nil
 
-	body, err := ioutil.ReadAll(response.Body)
-
-	if err != nil {
-		return "", err
-	}
-
-	return string(body), nil
 
 }

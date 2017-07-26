@@ -1,8 +1,7 @@
 package callbackValueJson
 
-
 type UserLettersCount struct {
-	HostId string `json:"host_id"`
-	Provider string `json:"provider"`
+	HostId       string `json:"host_id"`
+	Provider     string `json:"provider"`
 	LettersCount string `json:"lettersCount"`
 }
