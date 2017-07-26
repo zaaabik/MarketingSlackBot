@@ -9,9 +9,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strconv"
-	"log"
-	"fmt"
 )
 
 type WebHook struct {
@@ -27,20 +24,21 @@ type j struct {
 }
 
 func (web WebHook) Start() {
+
 	r := chi.NewRouter()
 	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
+
 		res, _ := ioutil.ReadAll(r.Body)
+
 		if len(res) < 8 {
 
 		} else {
 			jsonStr, _ := url.QueryUnescape(string(res)[8:])
 			var s slack.AttachmentActionCallback
 			json.Unmarshal([]byte(jsonStr), &s)
-			fmt.Println(s.CallbackID)
 			switch s.CallbackID {
 			case "user/letters_count":
 				{
-					log.Print("user/letters_count")
 					web.userLettersCount(s.Actions[0].Value)
 				}
 
@@ -54,7 +52,6 @@ func (web WebHook) Start() {
 func (web WebHook) userLettersCount(value string) (string, error) {
 	var valueJson callbackValueJson.UserLettersCount
 	json.Unmarshal([]byte(value), &valueJson)
-	lettersCountInt, err := strconv.Atoi(valueJson.LettersCount)
-	response, err := web.client.AddLettersTohost(valueJson.HostId, valueJson.Provider, lettersCountInt)
+	response, err := web.client.AddLettersTohost(valueJson.HostId, valueJson.Provider, valueJson.LettersCount)
 	return response, err
 }

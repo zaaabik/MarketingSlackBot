@@ -1,12 +1,11 @@
 package marketingClient
 
 import (
-	"fmt"
+	"bytes"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
-	"strings"
 )
 
 type MarketingClient struct {
@@ -30,7 +29,6 @@ func (client *MarketingClient) GetUserCount(userId string, provider string) (str
 	q.Add("host_id", userId)
 	q.Add("provider", provider)
 	req.URL.RawQuery = q.Encode()
-	log.Print(req.URL)
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", err
@@ -71,24 +69,32 @@ func (client *MarketingClient) GetTransactionCount(userId string, provider strin
 
 	return string(body), nil
 }
-func (client *MarketingClient) AddLettersTohost(userId string, provider string, lettersCount int) (string, error) {
-	const method = "user/letters_count"
-
+func (client *MarketingClient) AddLettersTohost(userId string, provider string, lettersCount string) (string, error) {
+	//const method = "user/letters_count"
+	const method = ""
 	form := url.Values{}
-	form.Add("user_id", userId)
-	form.Add("provider", provider)
-	form.Add("lettersCount", "1")
+	form.Set("host_id", userId)
+	form.Set("provider", provider)
+	form.Set("lettersCount", lettersCount)
 
-	fmt.Println(form.Encode())
-	req, err := http.NewRequest("PATCH", client.baseApiUrl+method, strings.NewReader(form.Encode()))
+	buffer := new(bytes.Buffer)
+	buffer.WriteString(form.Encode())
+	//body := []byte("user_id=3&provider=radario&lettersCount=1")
+	//	js,err := json.Marshal(form)
+	log.Println(form.Encode())
+	req, err := http.NewRequest("PATCH", client.baseApiUrl+method, buffer)
 	if err != nil {
+		log.Print(err)
 		return "", err
 	}
 
 	req.Header.Add("X-MARKETING-SECURITY", client.httpToken)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	response, err := http.DefaultClient.Do(req)
-	log.Print(req)
 	if err != nil {
+		log.Println("")
+		log.Println(err)
+		log.Println("")
 		return "", err
 	}
 

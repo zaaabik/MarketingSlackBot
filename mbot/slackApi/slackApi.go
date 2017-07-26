@@ -51,15 +51,15 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 	m := make(map[string]string)
 	m["provider"] = args[len(args)-1]
 	m["host_id"] = args[len(args)-2]
-
 	response, err := b.client.GetTransactionCount(m["host_id"], m["provider"])
 
 	if err != nil {
+		bot.Reply(evt, "<@"+evt.User+"> "+"error", slackbot.WithoutTyping)
 		return
 	}
 	m["response"] = response
 	m["user"] = evt.User
-	b.database.Save(m)
+	//b.database.Save(m)
 	bot.Reply(evt, "<@"+evt.User+"> "+response, slackbot.WithoutTyping)
 }
 
@@ -79,17 +79,17 @@ func (b *SlackBot) getUserCountHandler(ctx context.Context, bot *slackbot.Bot, e
 	}
 	m["response"] = response
 	m["user"] = evt.User
-	b.database.Save(m)
+	//b.database.Save(m)
 	bot.Reply(evt, "<@"+evt.User+"> "+response, slackbot.WithoutTyping)
 }
 
 func (b *SlackBot) addLettersToUser(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
-	m["lettersCount"] = args[len(args)-4]
+	m["lettersCount"] = args[len(args)-5]
 	m["provider"] = args[len(args)-1]
 	m["host_id"] = args[len(args)-2]
-
+	//b.client.AddLettersTohost(m["host_id"], m["provider"], 1)
 	value := callbackValueJson.UserLettersCount{m["host_id"], m["provider"], m["lettersCount"]}
 	jsonValue, err := json.Marshal(value)
 	_ = err
