@@ -17,11 +17,11 @@ func NewMarketingClient(apiUrl, token string) *MarketingClient {
 	return &MarketingClient{apiUrl, token}
 }
 
-func (client *MarketingClient) GetUserCount(userId string, provider string) (string, error) {
+func (client *MarketingClient) GetUserCount(userId string, provider string) (string, error,int) {
 	const method = "customers/count"
 	req, err := http.NewRequest("GET", client.baseApiUrl+method, nil)
 	if err != nil {
-		return "", err
+		return "", err,0
 	}
 
 	req.Header.Add("X-MARKETING-SECURITY", client.httpToken)
@@ -31,23 +31,23 @@ func (client *MarketingClient) GetUserCount(userId string, provider string) (str
 	req.URL.RawQuery = q.Encode()
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", err
+		return "", err,0
 	}
 
 	body, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {
-		return "", err
+		return "", err,0
 	}
 
-	return string(body), nil
+	return string(body), nil,response.StatusCode
 }
 
-func (client *MarketingClient) GetTransactionCount(userId string, provider string) (string, error) {
+func (client *MarketingClient) GetTransactionCount(userId string, provider string) (string, error,int) {
 	const method = "customer_transactions/count"
 	req, err := http.NewRequest("GET", client.baseApiUrl+method, nil)
 	if err != nil {
-		return "", err
+		return "", err,0
 	}
 
 	req.Header.Add("X-MARKETING-SECURITY", client.httpToken)
@@ -58,16 +58,16 @@ func (client *MarketingClient) GetTransactionCount(userId string, provider strin
 	log.Print(q)
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", err
+		return "", err,0
 	}
 
 	body, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {
-		return "", err
+		return "", err,0
 	}
 
-	return string(body), nil
+	return string(body), nil,response.StatusCode
 }
 func (client *MarketingClient) AddLettersTohost(userId string, provider string, lettersCount string) (int,error) {
 	const method = "user/letters_count"

@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"errors"
 	"github.com/radario/MarketingSlackBot/mbot/db"
 )
 
@@ -42,11 +41,17 @@ func (web WebHook) Start() {
 			switch s.CallbackID {
 			case "user/letters_count":
 				{
-					err := web.userLettersCount(s.Actions[0].Value)
-					if err != nil {
-						w.Write([]byte(err.Error()))
-					}else {
-						w.Write([]byte("success"))
+					if s.Actions[0].Value == "no"{
+						w.Write([]byte("canceled"))
+						return
+					}
+					httpCode := web.userLettersCount(s.Actions[0].Value)
+					if httpCode == http.StatusOK{
+						w.Write([]byte("added"))
+					}else if(httpCode == http.StatusBadRequest){
+						w.Write([]byte("wrong data"))
+					}else if(httpCode == http.StatusInternalServerError){
+						w.Write([]byte("ooops! something went wrong "))
 					}
 				}
 
@@ -57,17 +62,12 @@ func (web WebHook) Start() {
 	http.ListenAndServe(":1113", r)
 }
 
-func (web WebHook) userLettersCount(value string) (error) {
+func (web WebHook) userLettersCount(value string) (int) {
 	var valueJson callbackValueJson.UserLettersCount
 	json.Unmarshal([]byte(value), &valueJson)
 	statusCode, err := web.client.AddLettersTohost(valueJson.HostId, valueJson.Provider, valueJson.LettersCount)
 	if err != nil{
-		return err
+		return 0
 	}
-	if statusCode == http.StatusOK{
-		return nil
-	}else if statusCode == http.StatusBadRequest {
-		return errors.New("user doesnt exist")
-	}
-	return nil
+	return statusCode
 }
