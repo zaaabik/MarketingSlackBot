@@ -47,11 +47,8 @@ func (b *SlackBot) Start() {
 }
 
 func (b *SlackBot) showHelp(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
-	addLettersHelp := ".add [letters Count] letters [host_id] [provider]"
-	getTransCoutHelp := ".get transaction count [host_id] [provider]"
-	getCustomersCountHelp := ".get customers count [host_id] [provider]"
-	example := ".add 1234 letters 3 radario"
-	res := "command list\n" + addLettersHelp + "\n" + getTransCoutHelp + "\n" + getCustomersCountHelp + "\n" + "example " + example
+
+	res := textConstants.Help
 	bot.Reply(evt, res, slackbot.WithoutTyping)
 }
 
