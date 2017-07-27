@@ -70,9 +70,9 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 	log.Println(evt.Msg.Text)
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
-	m["provider"] = args[len(args)-1]
-	m["host_id"] = args[len(args)-2]
-	response, err, httpCode := b.client.GetTransactionCount(m["host_id"], m["provider"])
+	m[textConstants.ProviderKey] = args[len(args)-1]
+	m[textConstants.HostIdKey] = args[len(args)-2]
+	response, err, httpCode := b.client.GetTransactionCount(m[textConstants.HostIdKey], m[textConstants.ProviderKey])
 
 	if err != nil {
 		bot.Reply(evt, "<@"+evt.User+"> "+textConstants.RequestErrorText, slackbot.WithoutTyping)
@@ -102,9 +102,9 @@ func (b *SlackBot) getCustomersCountHandler(ctx context.Context, bot *slackbot.B
 
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
-	m["provider"] = args[len(args)-1]
-	m["host_id"] = args[len(args)-2]
-	response, err, httpCode := b.client.GetUserCount(m["host_id"], m["provider"])
+	m[textConstants.ProviderKey] = args[len(args)-1]
+	m[textConstants.HostIdKey] = args[len(args)-2]
+	response, err, httpCode := b.client.GetUserCount(m[textConstants.HostIdKey], m[textConstants.ProviderKey])
 
 	if err != nil {
 		bot.Reply(evt, "<@"+evt.User+"> "+textConstants.RequestErrorText, slackbot.WithoutTyping)
@@ -133,10 +133,10 @@ func (b *SlackBot) getCustomersCountHandler(ctx context.Context, bot *slackbot.B
 func (b *SlackBot) addLettersToUser(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
-	m["lettersCount"] = args[len(args)-4]
-	m["provider"] = args[len(args)-1]
-	m["host_id"] = args[len(args)-2]
-	value := entities.UserLettersCount{m["host_id"], m["provider"], m["lettersCount"]}
+	m[textConstants.LettersCountKey] = args[len(args)-4]
+	m[textConstants.ProviderKey] = args[len(args)-1]
+	m[textConstants.HostIdKey] = args[len(args)-2]
+	value := entities.UserLettersCount{m[textConstants.HostIdKey], m[textConstants.ProviderKey], m[textConstants.LettersCountKey]}
 	jsonValue, err := json.Marshal(value)
 	_ = err
 	okAction := slack.AttachmentAction{
@@ -151,11 +151,11 @@ func (b *SlackBot) addLettersToUser(ctx context.Context, bot *slackbot.Bot, evt 
 		Name:  "cancel",
 		Value: "no",
 	}
-	str := "Do you want to add " + m["lettersCount"] + " letters to " + m["host_id"] + " " + m["provider"] + "?"
+	str := "Do you want to add " + m[textConstants.LettersCountKey] + " letters to " + m[textConstants.HostIdKey] + " " + m[textConstants.ProviderKey] + "?"
 	attach := slack.Attachment{
 		Title:      str,
 		Actions:    []slack.AttachmentAction{okAction, cancelAction},
-		CallbackID: "user/letters_count",
+		CallbackID: textConstants.AddUserLetterCountMethod,
 	}
 	bot.ReplyWithAttachments(evt, []slack.Attachment{attach}, slackbot.WithoutTyping)
 }

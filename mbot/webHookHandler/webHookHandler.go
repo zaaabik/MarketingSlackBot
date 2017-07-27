@@ -39,7 +39,7 @@ func (web WebHook) Start() {
 			var s slack.AttachmentActionCallback
 			json.Unmarshal([]byte(jsonStr), &s)
 			switch s.CallbackID {
-			case "user/letters_count":
+			case textConstants.AddUserLetterCountMethod:
 				{
 					user := s.User.ID
 					if s.Actions[0].Value == "no" {

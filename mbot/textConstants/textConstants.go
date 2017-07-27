@@ -15,4 +15,6 @@ const (
 	HostIdKey       = "host_id"
 	ProviderKey     = "provider"
 	LettersCountKey = "letters_count"
+
+	AddUserLetterCountMethod = "user/letters_count"
 )
