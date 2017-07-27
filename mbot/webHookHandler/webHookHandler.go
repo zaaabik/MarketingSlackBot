@@ -48,8 +48,8 @@ func (web WebHook) Start() {
 					httpCode := web.userLettersCount(s.Actions[0].Value)
 					if httpCode == http.StatusOK{
 						w.Write([]byte("added"))
-					}else if(httpCode == http.StatusBadRequest){
-						w.Write([]byte("wrong data"))
+					}else if(httpCode == http.StatusNotFound){
+						w.Write([]byte("user doesn`t exist"))
 					}else if(httpCode == http.StatusInternalServerError){
 						w.Write([]byte("ooops! something went wrong "))
 					}

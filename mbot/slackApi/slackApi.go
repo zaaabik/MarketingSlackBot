@@ -23,7 +23,6 @@ type SlackBot struct {
 
 func NewBot(botToken string, store *db.Store, client *marketingClient.MarketingClient) *SlackBot {
 	return &SlackBot{server: webHookHandler.NewWebHookHandler(client, *store), botToken: botToken, database: *store, client: client}
-
 }
 
 func (b *SlackBot) SetToken(token string) {
@@ -45,10 +44,11 @@ func (b *SlackBot) Start() {
 }
 
 func (b *SlackBot) showHelp(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
-	addLettersHelp := "- add [letters Count] letters [host_id] [provider]"
-	getTransCoutHelp := "- get transaction count [host_id] [provider]"
-	getCustomersCountHelp := " -get customers count [host_id] [provider]"
-	res := "command list\n" + addLettersHelp + "\n" + getTransCoutHelp + "\n" + getCustomersCountHelp
+	addLettersHelp := ".add [letters Count] letters [host_id] [provider]"
+	getTransCoutHelp := ".get transaction count [host_id] [provider]"
+	getCustomersCountHelp := ".get customers count [host_id] [provider]"
+	example := ".add 1234 letters 3 radario"
+	res := "command list\n" + addLettersHelp + "\n" + getTransCoutHelp + "\n" + getCustomersCountHelp + "\n" + "example " + example
 	bot.Reply(evt, res, slackbot.WithoutTyping)
 }
 
@@ -75,13 +75,17 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 		return
 	}
 
-	if httpCode == http.StatusInternalServerError {
-		bot.Reply(evt, "<@"+evt.User+"> "+"ooops! somthing went wrong. Try again", slackbot.WithoutTyping)
-		return
-	}
-	if httpCode == http.StatusBadRequest {
-		bot.Reply(evt, "<@"+evt.User+"> "+"wrong data", slackbot.WithoutTyping)
-		return
+	switch httpCode {
+	case http.StatusInternalServerError:
+		{
+			bot.Reply(evt, "<@"+evt.User+"> "+"ooops! something went wrong. Try again", slackbot.WithoutTyping)
+			return
+		}
+	case http.StatusNotFound:
+		{
+			bot.Reply(evt, "<@"+evt.User+"> "+"user doesn`t exist", slackbot.WithoutTyping)
+			return
+		}
 	}
 
 	m["response"] = response
@@ -103,13 +107,17 @@ func (b *SlackBot) getUserCountHandler(ctx context.Context, bot *slackbot.Bot, e
 		return
 	}
 
-	if httpCode == http.StatusInternalServerError {
-		bot.Reply(evt, "<@"+evt.User+"> "+"ooops! somthing went wrong. Try again", slackbot.WithoutTyping)
-		return
-	}
-	if httpCode == http.StatusBadRequest {
-		bot.Reply(evt, "<@"+evt.User+"> "+"wrong data", slackbot.WithoutTyping)
-		return
+	switch httpCode {
+	case http.StatusInternalServerError:
+		{
+			bot.Reply(evt, "<@"+evt.User+"> "+"ooops! something went wrong. Try again", slackbot.WithoutTyping)
+			return
+		}
+	case http.StatusNotFound:
+		{
+			bot.Reply(evt, "<@"+evt.User+"> "+"user doesn`t exist", slackbot.WithoutTyping)
+			return
+		}
 	}
 
 	m["response"] = response
@@ -140,7 +148,7 @@ func (b *SlackBot) addLettersToUser(ctx context.Context, bot *slackbot.Bot, evt 
 		Name:  "cancel",
 		Value: "no",
 	}
-	str := "Do you want to get user count of " + m["user_id"] + m["provider"] + "?"
+	str := "Do you want to add " + m["lettersCount"] + " letters to " + m["host_id"] + " " + m["provider"] + "?"
 	attach := slack.Attachment{
 		Title:      str,
 		Actions:    []slack.AttachmentAction{okAction, cancelAction},

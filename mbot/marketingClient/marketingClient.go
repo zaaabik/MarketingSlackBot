@@ -17,11 +17,11 @@ func NewMarketingClient(apiUrl, token string) *MarketingClient {
 	return &MarketingClient{apiUrl, token}
 }
 
-func (client *MarketingClient) GetUserCount(userId string, provider string) (string, error,int) {
+func (client *MarketingClient) GetUserCount(userId string, provider string) (string, error, int) {
 	const method = "customers/count"
 	req, err := http.NewRequest("GET", client.baseApiUrl+method, nil)
 	if err != nil {
-		return "", err,0
+		return "", err, 0
 	}
 
 	req.Header.Add("X-MARKETING-SECURITY", client.httpToken)
@@ -31,23 +31,23 @@ func (client *MarketingClient) GetUserCount(userId string, provider string) (str
 	req.URL.RawQuery = q.Encode()
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", err,0
+		return "", err, 0
 	}
 
 	body, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {
-		return "", err,0
+		return "", err, 0
 	}
 
-	return string(body), nil,response.StatusCode
+	return string(body), nil, response.StatusCode
 }
 
-func (client *MarketingClient) GetTransactionCount(userId string, provider string) (string, error,int) {
+func (client *MarketingClient) GetTransactionCount(userId string, provider string) (string, error, int) {
 	const method = "customer_transactions/count"
 	req, err := http.NewRequest("GET", client.baseApiUrl+method, nil)
 	if err != nil {
-		return "", err,0
+		return "", err, 0
 	}
 
 	req.Header.Add("X-MARKETING-SECURITY", client.httpToken)
@@ -58,18 +58,18 @@ func (client *MarketingClient) GetTransactionCount(userId string, provider strin
 	log.Print(q)
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", err,0
+		return "", err, 0
 	}
 
 	body, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {
-		return "", err,0
+		return "", err, 0
 	}
 
-	return string(body), nil,response.StatusCode
+	return string(body), nil, response.StatusCode
 }
-func (client *MarketingClient) AddLettersTohost(userId string, provider string, lettersCount string) (int,error) {
+func (client *MarketingClient) AddLettersTohost(userId string, provider string, lettersCount string) (int, error) {
 	const method = "user/letters_count"
 	//const method = ""
 	form := url.Values{}
@@ -79,22 +79,20 @@ func (client *MarketingClient) AddLettersTohost(userId string, provider string, 
 
 	buffer := new(bytes.Buffer)
 	buffer.WriteString(form.Encode())
-	//body := []byte("user_id=3&provider=radario&lettersCount=1")
-	//	js,err := json.Marshal(form)
+
 	log.Println(form.Encode())
-	req, err := http.NewRequest("PATCH", client.baseApiUrl+method, buffer)
+	req, err := http.NewRequest("PUT", client.baseApiUrl+method, buffer)
 	if err != nil {
 		log.Print(err)
-		return http.StatusOK,err
+		return http.StatusOK, err
 	}
 
 	req.Header.Add("X-MARKETING-SECURITY", client.httpToken)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return 0,err
+		return 0, err
 	}
-	return response.StatusCode,nil
-
+	return response.StatusCode, nil
 
 }
