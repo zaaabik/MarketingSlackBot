@@ -12,7 +12,8 @@ import (
 	"golang.org/x/net/context"
 	"net/http"
 	"strings"
-	"github.com/radario/MarketingSlackBot/mbot/errorsText"
+	"github.com/radario/MarketingSlackBot/mbot/textConstants"
+	"log"
 )
 
 
@@ -36,9 +37,9 @@ func (b *SlackBot) Start() {
 	bot := slackbot.New(b.botToken)
 	go b.server.Start()
 	toMe := bot.Messages(slackbot.DirectMessage, slackbot.DirectMention).Subrouter()
-	toMe.Hear(`((<@\d+>\s*)+|(^\s*))(\.add (-)?\d* letters \w+ \w+\s*$)`).MessageHandler(b.addLettersToUser)
-	toMe.Hear(`((<@\d+>\s*)+|(^\s*))(\.get transaction count \w+ \w+\s*$)`).MessageHandler(b.getTransactionCountHandler)
-	toMe.Hear(`((<@\d+>\s*)+|(^\s*))(\.get customers count \w+ \w+\s*$)`).MessageHandler(b.getUserCountHandler)
+	toMe.Hear(`((<@\w+>\s*)+|(^\s*))(\.add (-)?\d* letters \w+ \w+\s*$)`).MessageHandler(b.addLettersToUser)
+	toMe.Hear(`((<@\w+>\s*)+|(^\s*))(\.get transaction count \w+ \w+\s*$)`).MessageHandler(b.getTransactionCountHandler)
+	toMe.Hear(`((<@\w+>\s*)+|(^\s*))(\.get customers count \w+ \w+\s*$)`).MessageHandler(b.getUserCountHandler)
 	toMe.Hear(`\.show`).MessageHandler(b.showHandler)
 	toMe.Hear(`\.del`).MessageHandler(b.delDbHandler)
 	toMe.Hear(`\.help`).MessageHandler(b.showHelp)
@@ -61,12 +62,16 @@ func (b *SlackBot) showHandler(ctx context.Context, bot *slackbot.Bot, evt *slac
 
 func (b *SlackBot) unknownCommand(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	//checking is message written by bot
+	log.Println(evt.Msg)
+	log.Println(evt.Msg.Text)
 	if evt.User != "" {
 		bot.Reply(evt, "unknown command\nwrite .help ", slackbot.WithoutTyping)
 	}
 }
 
 func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
+	log.Println(evt.Msg)
+	log.Println(evt.Msg.Text)
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
 	m["provider"] = args[len(args)-1]
@@ -74,19 +79,19 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 	response, err, httpCode := b.client.GetTransactionCount(m["host_id"], m["provider"])
 
 	if err != nil {
-		bot.Reply(evt, "<@"+evt.User+"> "+errorsText.RequestErrorText, slackbot.WithoutTyping)
+		bot.Reply(evt, "<@"+evt.User+"> "+textConstants.RequestErrorText, slackbot.WithoutTyping)
 		return
 	}
 
 	switch httpCode {
 	case http.StatusInternalServerError:
 		{
-			bot.Reply(evt, "<@"+evt.User+"> "+errorsText.ServerErrorText, slackbot.WithoutTyping)
+			bot.Reply(evt, "<@"+evt.User+"> "+textConstants.ServerErrorText, slackbot.WithoutTyping)
 			return
 		}
 	case http.StatusNotFound:
 		{
-			bot.Reply(evt, "<@"+evt.User+"> "+errorsText.UserDoesNotExistText, slackbot.WithoutTyping)
+			bot.Reply(evt, "<@"+evt.User+"> "+textConstants.UserDoesNotExistText, slackbot.WithoutTyping)
 			return
 		}
 	}
@@ -106,19 +111,19 @@ func (b *SlackBot) getUserCountHandler(ctx context.Context, bot *slackbot.Bot, e
 	response, err, httpCode := b.client.GetUserCount(m["host_id"], m["provider"])
 
 	if err != nil {
-		bot.Reply(evt, "<@"+evt.User+"> "+errorsText.RequestErrorText, slackbot.WithoutTyping)
+		bot.Reply(evt, "<@"+evt.User+"> "+textConstants.RequestErrorText, slackbot.WithoutTyping)
 		return
 	}
 
 	switch httpCode {
 	case http.StatusInternalServerError:
 		{
-			bot.Reply(evt, "<@"+evt.User+"> "+errorsText.RequestErrorText, slackbot.WithoutTyping)
+			bot.Reply(evt, "<@"+evt.User+"> "+textConstants.RequestErrorText, slackbot.WithoutTyping)
 			return
 		}
 	case http.StatusNotFound:
 		{
-			bot.Reply(evt, "<@"+evt.User+"> "+errorsText.UserDoesNotExistText, slackbot.WithoutTyping)
+			bot.Reply(evt, "<@"+evt.User+"> "+textConstants.UserDoesNotExistText, slackbot.WithoutTyping)
 			return
 		}
 	}
@@ -135,7 +140,6 @@ func (b *SlackBot) addLettersToUser(ctx context.Context, bot *slackbot.Bot, evt 
 	m["lettersCount"] = args[len(args)-4]
 	m["provider"] = args[len(args)-1]
 	m["host_id"] = args[len(args)-2]
-
 	value := entities.UserLettersCount{m["host_id"], m["provider"], m["lettersCount"]}
 	jsonValue, err := json.Marshal(value)
 	_ = err

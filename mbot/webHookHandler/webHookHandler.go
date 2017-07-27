@@ -6,7 +6,7 @@ import (
 	"github.com/nlopes/slack"
 	"github.com/radario/MarketingSlackBot/mbot/db"
 	"github.com/radario/MarketingSlackBot/mbot/entities"
-	"github.com/radario/MarketingSlackBot/mbot/errorsText"
+	"github.com/radario/MarketingSlackBot/mbot/textConstants"
 	"github.com/radario/MarketingSlackBot/mbot/marketingClient"
 	"io/ioutil"
 	"net/http"
@@ -41,20 +41,29 @@ func (web WebHook) Start() {
 			switch s.CallbackID {
 			case "user/letters_count":
 				{
+					user := s.User.ID
 					if s.Actions[0].Value == "no" {
-						w.Write([]byte("canceled"))
+						response := "<@" + user + "> " + textConstants.CanceledEventText
+						w.Write([]byte(response))
 						return
 					}
 					httpCode := web.userLettersCount(s.Actions[0].Value)
+
 					switch httpCode {
 					case http.StatusOK:
-						w.Write([]byte("added"))
+						{
+							response := "<@" + user + "> " + textConstants.ApproveEventText
+							w.Write([]byte(response))
+						}
 					case http.StatusNotFound:
-						w.Write([]byte(errorsText.UserDoesNotExistText))
+						response := "<@" + user + "> " + textConstants.UserDoesNotExistText
+						w.Write([]byte(response))
 					case http.StatusInternalServerError:
-						w.Write([]byte(errorsText.ServerErrorText))
+						response := "<@" + user + "> " + textConstants.ServerErrorText
+						w.Write([]byte(response))
 					default:
-						w.Write([]byte(errorsText.RequestErrorText))
+						response := "<@" + user + "> " + textConstants.RequestErrorText
+						w.Write([]byte(response))
 					}
 				}
 

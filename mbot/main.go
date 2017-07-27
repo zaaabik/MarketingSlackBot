@@ -8,17 +8,18 @@ import (
 )
 
 var config struct {
-	HttpAddress string `long:"http_address" env:"HTTP_ADDRESS"`
-	Token       string `long:"token" env:"TOKEN"`
-	Path        string `long:"db_path" env:"DB_PATH"`
-	HttpToken   string `long:"http_token" env:"HTTP_TOKEN"`
+	BaseApiUrl     string `long:"base_url" env:"BASE_URL"`
+	BotUserToken   string `long:"bot_token" env:"BOT_TOKEN"`
+	DatabasePath   string `long:"db_path" env:"DB_PATH"`
+	HttpTokenValue string `long:"http_token_value" env:"HTTP_TOKEN_VALUE"`
+	HttpTokenKey   string `long:"http_token_key" env:"HTTP_TOKEN_KEY"`
 }
 
 func main() {
 	flags.Parse(&config)
 	var database db.Store
-	database = db.NewBoltDb(config.Path)
-	client := marketingClient.NewMarketingClient(config.HttpAddress, config.HttpToken)
-	bot := slackApi.NewBot(config.Token, &database, client)
+	database = db.NewBoltDb(config.DatabasePath)
+	client := marketingClient.NewMarketingClient(config.BaseApiUrl, config.HttpTokenValue,config.HttpTokenKey)
+	bot := slackApi.NewBot(config.BotUserToken, &database, client)
 	bot.Start()
 }

@@ -9,12 +9,13 @@ import (
 )
 
 type MarketingClient struct {
-	baseApiUrl string
-	httpToken  string
+	baseApiUrl     string
+	httpTokenValue string
+	httpTokenKey	string
 }
 
-func NewMarketingClient(apiUrl, token string) *MarketingClient {
-	return &MarketingClient{apiUrl, token}
+func NewMarketingClient(apiUrl, tokenValue, tokenKey string) *MarketingClient {
+	return &MarketingClient{apiUrl, tokenValue, tokenKey}
 }
 
 func (client *MarketingClient) GetUserCount(userId string, provider string) (string, error, int) {
@@ -24,7 +25,7 @@ func (client *MarketingClient) GetUserCount(userId string, provider string) (str
 		return "", err, 0
 	}
 
-	req.Header.Add("X-MARKETING-SECURITY", client.httpToken)
+	req.Header.Add("X-MARKETING-SECURITY", client.httpTokenValue)
 	q := req.URL.Query()
 	q.Add("host_id", userId)
 	q.Add("provider", provider)
@@ -50,7 +51,7 @@ func (client *MarketingClient) GetTransactionCount(userId string, provider strin
 		return "", err, 0
 	}
 
-	req.Header.Add("X-MARKETING-SECURITY", client.httpToken)
+	req.Header.Add("X-MARKETING-SECURITY", client.httpTokenValue)
 	q := req.URL.Query()
 	q.Add("host_id", userId)
 	q.Add("provider", provider)
@@ -86,7 +87,7 @@ func (client *MarketingClient) AddLettersTohost(userId string, provider string, 
 		return http.StatusOK, err
 	}
 
-	req.Header.Add("X-MARKETING-SECURITY", client.httpToken)
+	req.Header.Add(client.httpTokenKey, client.httpTokenValue)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
