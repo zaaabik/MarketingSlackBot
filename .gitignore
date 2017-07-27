@@ -2,5 +2,7 @@
 /.idea/MarketingSlackBot.iml
 /.idea/libraries/GOPATH__MarketingSlackBot_.xml
 /.idea/modules.xml
+/.idea/misc.xml
+/.idea/vcs.xml
 *.md
 .idea/
