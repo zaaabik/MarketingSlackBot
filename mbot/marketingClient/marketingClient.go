@@ -20,7 +20,7 @@ func NewMarketingClient(apiUrl, tokenValue, tokenKey string) *MarketingClient {
 }
 
 func (client *MarketingClient) GetUserCount(userId string, provider string) (string, error, int) {
-	req, err := http.NewRequest("GET", client.baseApiUrl+textConstants.CustomersCountMethod, nil)
+	req, err := http.NewRequest("GET", client.baseApiUrl+textConstants.GetCustomersCountMethod, nil)
 	if err != nil {
 		return "", err, 0
 	}
@@ -45,7 +45,7 @@ func (client *MarketingClient) GetUserCount(userId string, provider string) (str
 }
 
 func (client *MarketingClient) GetTransactionCount(userId string, provider string) (string, error, int) {
-	req, err := http.NewRequest("GET", client.baseApiUrl+textConstants.CustomersCountMethod, nil)
+	req, err := http.NewRequest("GET", client.baseApiUrl+textConstants.GetCustomersTransactionMethod, nil)
 	if err != nil {
 		return "", err, 0
 	}

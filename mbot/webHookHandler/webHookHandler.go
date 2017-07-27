@@ -6,8 +6,8 @@ import (
 	"github.com/nlopes/slack"
 	"github.com/radario/MarketingSlackBot/mbot/db"
 	"github.com/radario/MarketingSlackBot/mbot/entities"
-	"github.com/radario/MarketingSlackBot/mbot/textConstants"
 	"github.com/radario/MarketingSlackBot/mbot/marketingClient"
+	"github.com/radario/MarketingSlackBot/mbot/textConstants"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -80,6 +80,14 @@ func (web WebHook) userLettersCount(value string) int {
 	statusCode, err := web.client.AddLettersTohost(valueJson.HostId, valueJson.Provider, valueJson.LettersCount)
 	if err != nil {
 		return 0
+	}
+	if statusCode == http.StatusOK {
+		m := make(map[string]string)
+		m["method"] = textConstants.AddUserLetterCountMethod
+		m[textConstants.ProviderKey] = valueJson.Provider
+		m[textConstants.HostIdKey] = valueJson.HostId
+		m[textConstants.LettersCountKey] = valueJson.LettersCount
+		web.database.Save(m)
 	}
 	return statusCode
 }

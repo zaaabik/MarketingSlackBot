@@ -12,7 +12,6 @@ import (
 	"github.com/radario/MarketingSlackBot/mbot/textConstants"
 	"github.com/radario/MarketingSlackBot/mbot/webHookHandler"
 	"golang.org/x/net/context"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -58,18 +57,15 @@ func (b *SlackBot) showHandler(ctx context.Context, bot *slackbot.Bot, evt *slac
 
 func (b *SlackBot) unknownCommand(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	//checking is message written by bot
-	log.Println(evt.Msg)
-	log.Println(evt.Msg.Text)
 	if evt.User != "" {
 		bot.Reply(evt, textConstants.UnknownCommand, slackbot.WithoutTyping)
 	}
 }
 
 func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
-	log.Println(evt.Msg)
-	log.Println(evt.Msg.Text)
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
+	m["method"] = textConstants.GetCustomersTransactionMethod
 	m[textConstants.ProviderKey] = args[len(args)-1]
 	m[textConstants.HostIdKey] = args[len(args)-2]
 	response, err, httpCode := b.client.GetTransactionCount(m[textConstants.HostIdKey], m[textConstants.ProviderKey])
@@ -99,9 +95,9 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 }
 
 func (b *SlackBot) getCustomersCountHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
-
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
+	m["method"] = textConstants.GetCustomersCountMethod
 	m[textConstants.ProviderKey] = args[len(args)-1]
 	m[textConstants.HostIdKey] = args[len(args)-2]
 	response, err, httpCode := b.client.GetUserCount(m[textConstants.HostIdKey], m[textConstants.ProviderKey])

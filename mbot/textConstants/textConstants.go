@@ -16,7 +16,7 @@ const (
 	ProviderKey     = "provider"
 	LettersCountKey = "letters_count"
 
-	AddUserLetterCountMethod = "user/letters_count"
-	CustomersCountMethod = "customers/count"
-	CutomersTransactionMethod = "customer_transactions/count"
+	AddUserLetterCountMethod      = "user/letters_count"
+	GetCustomersCountMethod       = "customers/count"
+	GetCustomersTransactionMethod = "customer_transactions/count"
 )
