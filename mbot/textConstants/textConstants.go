@@ -17,4 +17,6 @@ const (
 	LettersCountKey = "letters_count"
 
 	AddUserLetterCountMethod = "user/letters_count"
+	CustomersCountMethod = "customers/count"
+	CutomersTransactionMethod = "customer_transactions/count"
 )
