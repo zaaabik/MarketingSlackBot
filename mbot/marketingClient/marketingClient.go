@@ -71,7 +71,6 @@ func (client *MarketingClient) GetTransactionCount(userId string, provider strin
 }
 func (client *MarketingClient) AddLettersTohost(userId string, provider string, lettersCount string) (int, error) {
 	const method = "user/letters_count"
-	//const method = ""
 	form := url.Values{}
 	form.Set("host_id", userId)
 	form.Set("provider", provider)

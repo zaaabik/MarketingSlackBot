@@ -5,14 +5,17 @@ import (
 	"encoding/json"
 	"github.com/adampointer/go-slackbot"
 	"github.com/nlopes/slack"
-	"github.com/radario/MarketingSlackBot/mbot/callbackValueJson"
+	"github.com/radario/MarketingSlackBot/mbot/entities"
 	"github.com/radario/MarketingSlackBot/mbot/db"
 	"github.com/radario/MarketingSlackBot/mbot/marketingClient"
 	"github.com/radario/MarketingSlackBot/mbot/webHookHandler"
 	"golang.org/x/net/context"
 	"net/http"
 	"strings"
+	"github.com/radario/MarketingSlackBot/mbot/errorsText"
 )
+
+
 
 type SlackBot struct {
 	server   *webHookHandler.WebHook
@@ -71,19 +74,19 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 	response, err, httpCode := b.client.GetTransactionCount(m["host_id"], m["provider"])
 
 	if err != nil {
-		bot.Reply(evt, "<@"+evt.User+"> "+"program error", slackbot.WithoutTyping)
+		bot.Reply(evt, "<@"+evt.User+"> "+errorsText.RequestErrorText, slackbot.WithoutTyping)
 		return
 	}
 
 	switch httpCode {
 	case http.StatusInternalServerError:
 		{
-			bot.Reply(evt, "<@"+evt.User+"> "+"ooops! something went wrong. Try again", slackbot.WithoutTyping)
+			bot.Reply(evt, "<@"+evt.User+"> "+errorsText.ServerErrorText, slackbot.WithoutTyping)
 			return
 		}
 	case http.StatusNotFound:
 		{
-			bot.Reply(evt, "<@"+evt.User+"> "+"user doesn`t exist", slackbot.WithoutTyping)
+			bot.Reply(evt, "<@"+evt.User+"> "+errorsText.UserDoesNotExistText, slackbot.WithoutTyping)
 			return
 		}
 	}
@@ -103,19 +106,19 @@ func (b *SlackBot) getUserCountHandler(ctx context.Context, bot *slackbot.Bot, e
 	response, err, httpCode := b.client.GetUserCount(m["host_id"], m["provider"])
 
 	if err != nil {
-		bot.Reply(evt, "<@"+evt.User+"> "+"ooops! program error", slackbot.WithoutTyping)
+		bot.Reply(evt, "<@"+evt.User+"> "+errorsText.RequestErrorText, slackbot.WithoutTyping)
 		return
 	}
 
 	switch httpCode {
 	case http.StatusInternalServerError:
 		{
-			bot.Reply(evt, "<@"+evt.User+"> "+"ooops! something went wrong. Try again", slackbot.WithoutTyping)
+			bot.Reply(evt, "<@"+evt.User+"> "+errorsText.RequestErrorText, slackbot.WithoutTyping)
 			return
 		}
 	case http.StatusNotFound:
 		{
-			bot.Reply(evt, "<@"+evt.User+"> "+"user doesn`t exist", slackbot.WithoutTyping)
+			bot.Reply(evt, "<@"+evt.User+"> "+errorsText.UserDoesNotExistText, slackbot.WithoutTyping)
 			return
 		}
 	}
@@ -133,7 +136,7 @@ func (b *SlackBot) addLettersToUser(ctx context.Context, bot *slackbot.Bot, evt 
 	m["provider"] = args[len(args)-1]
 	m["host_id"] = args[len(args)-2]
 
-	value := callbackValueJson.UserLettersCount{m["host_id"], m["provider"], m["lettersCount"]}
+	value := entities.UserLettersCount{m["host_id"], m["provider"], m["lettersCount"]}
 	jsonValue, err := json.Marshal(value)
 	_ = err
 	okAction := slack.AttachmentAction{
