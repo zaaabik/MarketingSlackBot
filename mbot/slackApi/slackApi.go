@@ -5,18 +5,17 @@ import (
 	"encoding/json"
 	"github.com/adampointer/go-slackbot"
 	"github.com/nlopes/slack"
-	"github.com/radario/MarketingSlackBot/mbot/entities"
 	"github.com/radario/MarketingSlackBot/mbot/db"
+	"github.com/radario/MarketingSlackBot/mbot/entities"
 	"github.com/radario/MarketingSlackBot/mbot/marketingClient"
+	"github.com/radario/MarketingSlackBot/mbot/messagesRegExp"
+	"github.com/radario/MarketingSlackBot/mbot/textConstants"
 	"github.com/radario/MarketingSlackBot/mbot/webHookHandler"
 	"golang.org/x/net/context"
+	"log"
 	"net/http"
 	"strings"
-	"github.com/radario/MarketingSlackBot/mbot/textConstants"
-	"log"
 )
-
-
 
 type SlackBot struct {
 	server   *webHookHandler.WebHook
@@ -37,13 +36,13 @@ func (b *SlackBot) Start() {
 	bot := slackbot.New(b.botToken)
 	go b.server.Start()
 	toMe := bot.Messages(slackbot.DirectMessage, slackbot.DirectMention).Subrouter()
-	toMe.Hear(`((<@\w+>\s*)+|(^\s*))(\.add (-)?\d* letters \w+ \w+\s*$)`).MessageHandler(b.addLettersToUser)
-	toMe.Hear(`((<@\w+>\s*)+|(^\s*))(\.get transaction count \w+ \w+\s*$)`).MessageHandler(b.getTransactionCountHandler)
-	toMe.Hear(`((<@\w+>\s*)+|(^\s*))(\.get customers count \w+ \w+\s*$)`).MessageHandler(b.getUserCountHandler)
-	toMe.Hear(`\.show`).MessageHandler(b.showHandler)
-	toMe.Hear(`\.del`).MessageHandler(b.delDbHandler)
-	toMe.Hear(`\.help`).MessageHandler(b.showHelp)
-	toMe.Hear(".*").MessageHandler(b.unknownCommand)
+	toMe.Hear(messagesRegExp.AddLettersToUserRegExp).MessageHandler(b.addLettersToUser)
+	toMe.Hear(messagesRegExp.GetTransactionCountRegExp).MessageHandler(b.getTransactionCountHandler)
+	toMe.Hear(messagesRegExp.GetCustomersCountRegExp).MessageHandler(b.getCustomersCountHandler)
+	toMe.Hear(messagesRegExp.ShowDbRegExp).MessageHandler(b.showHandler)
+	toMe.Hear(messagesRegExp.DeleteDbRegExp).MessageHandler(b.delDbHandler)
+	toMe.Hear(messagesRegExp.HelpRegExp).MessageHandler(b.showHelp)
+	toMe.Hear(messagesRegExp.AllRegExp).MessageHandler(b.unknownCommand)
 	bot.Run()
 }
 
@@ -102,7 +101,7 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 	bot.Reply(evt, "<@"+evt.User+"> "+response, slackbot.WithoutTyping)
 }
 
-func (b *SlackBot) getUserCountHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
+func (b *SlackBot) getCustomersCountHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
