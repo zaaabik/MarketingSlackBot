@@ -61,7 +61,7 @@ func (b *SlackBot) unknownCommand(ctx context.Context, bot *slackbot.Bot, evt *s
 	log.Println(evt.Msg)
 	log.Println(evt.Msg.Text)
 	if evt.User != "" {
-		bot.Reply(evt, "unknown command\nwrite .help ", slackbot.WithoutTyping)
+		bot.Reply(evt, textConstants.UnknownCommand, slackbot.WithoutTyping)
 	}
 }
 

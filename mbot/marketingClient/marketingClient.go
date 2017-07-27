@@ -11,7 +11,7 @@ import (
 type MarketingClient struct {
 	baseApiUrl     string
 	httpTokenValue string
-	httpTokenKey	string
+	httpTokenKey   string
 }
 
 func NewMarketingClient(apiUrl, tokenValue, tokenKey string) *MarketingClient {

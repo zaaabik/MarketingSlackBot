@@ -19,7 +19,7 @@ func main() {
 	flags.Parse(&config)
 	var database db.Store
 	database = db.NewBoltDb(config.DatabasePath)
-	client := marketingClient.NewMarketingClient(config.BaseApiUrl, config.HttpTokenValue,config.HttpTokenKey)
+	client := marketingClient.NewMarketingClient(config.BaseApiUrl, config.HttpTokenValue, config.HttpTokenKey)
 	bot := slackApi.NewBot(config.BotUserToken, &database, client)
 	bot.Start()
 }
