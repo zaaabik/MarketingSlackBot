@@ -50,7 +50,7 @@ func (web WebHook) Start() {
 					httpCode := web.userLettersCount(s.Actions[0].Value)
 
 					switch httpCode {
-					case http.StatusOK:
+					case http.StatusCreated:
 						{
 							response := "<@" + user + "> " + textConstants.ApproveEventText
 							w.Write([]byte(response))
