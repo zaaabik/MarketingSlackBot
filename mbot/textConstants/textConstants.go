@@ -1,7 +1,7 @@
 package textConstants
 
 const (
-	RequestErrorText     = "Ooops! something went wrong, check base internet connection and base api url"
+	RequestErrorText     = "Ooops! something went wrong, check internet connection and base api url"
 	UserDoesNotExistText = "User does not exist!"
 	ServerErrorText      = "Server error"
 	CanceledEventText    = "cancel"
