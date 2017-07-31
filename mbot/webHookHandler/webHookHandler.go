@@ -74,7 +74,7 @@ func (web WebHook) Start() {
 						w.Write([]byte(response))
 						return
 					}
-					httpCode := web.userLettersCount(s.Actions[0].Value)
+					httpCode := web.updateSendgridEmail(s.Actions[0].Value)
 
 					switch httpCode {
 					case http.StatusOK:
@@ -118,10 +118,10 @@ func (web WebHook) userLettersCount(value string) int {
 	return statusCode
 }
 
-func (web WebHook) userLettersCount(value string) int {
+func (web WebHook) updateSendgridEmail(value string) int {
 	var valueJson entities.UserSendGrid
 	json.Unmarshal([]byte(value), &valueJson)
-	statusCode, err := web.client.UpdateSendgridEmail(valueJson.HostId,valueJson.Provider,valueJson.Email)
+	statusCode, err := web.client.UpdateSendgridEmail(valueJson.HostId, valueJson.Provider, valueJson.Email)
 	if err != nil {
 		return 0
 	}
@@ -135,5 +135,3 @@ func (web WebHook) userLettersCount(value string) int {
 	}
 	return statusCode
 }
-
-
