@@ -19,4 +19,5 @@ const (
 	AddUserLetterCountMethod      = "user/letters_count"
 	GetCustomersCountMethod       = "customers/count"
 	GetCustomersTransactionMethod = "customer_transactions/count"
+	UpdateSendgridEmail           = "user/sendgrid"
 )

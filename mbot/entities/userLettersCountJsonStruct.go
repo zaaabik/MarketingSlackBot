@@ -9,5 +9,5 @@ type UserLettersCount struct {
 type UserSendGrid struct {
 	HostId   string `json:"host_id"`
 	Provider string `json:"provider"`
-	email    string `json:"lettersCount"`
+	email    string `json:"email"`
 }
