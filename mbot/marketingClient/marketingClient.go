@@ -69,6 +69,7 @@ func (client *MarketingClient) GetTransactionCount(userId string, provider strin
 
 	return string(body), nil, response.StatusCode
 }
+
 func (client *MarketingClient) AddLettersTohost(userId string, provider string, lettersCount string) (int, error) {
 	form := url.Values{}
 	form.Set(textConstants.HostIdKey, userId)
@@ -80,6 +81,32 @@ func (client *MarketingClient) AddLettersTohost(userId string, provider string, 
 
 	log.Println(form.Encode())
 	req, err := http.NewRequest("PUT", client.baseApiUrl+textConstants.AddUserLetterCountMethod, buffer)
+	if err != nil {
+		log.Print(err)
+		return http.StatusOK, err
+	}
+
+	req.Header.Add(client.httpTokenKey, client.httpTokenValue)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	response, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return 0, err
+	}
+	return response.StatusCode, nil
+
+}
+
+func (client *MarketingClient) UpdateSendgridEmail(userId string, provider string, email string) (int, error) {
+	form := url.Values{}
+	form.Set(textConstants.HostIdKey, userId)
+	form.Set(textConstants.ProviderKey, provider)
+	form.Set(textConstants.EmailKey, email)
+
+	buffer := new(bytes.Buffer)
+	buffer.WriteString(form.Encode())
+
+	log.Println(form.Encode())
+	req, err := http.NewRequest("PUT", client.baseApiUrl+textConstants.UpdateSendgridEmail, buffer)
 	if err != nil {
 		log.Print(err)
 		return http.StatusOK, err

@@ -66,7 +66,33 @@ func (web WebHook) Start() {
 						w.Write([]byte(response))
 					}
 				}
+			case textConstants.UpdateSendgridEmail:
+				{
+					user := s.User.ID
+					if s.Actions[0].Value == "no" {
+						response := "<@" + user + "> " + textConstants.CanceledEventText
+						w.Write([]byte(response))
+						return
+					}
+					httpCode := web.userLettersCount(s.Actions[0].Value)
 
+					switch httpCode {
+					case http.StatusOK:
+						{
+							response := "<@" + user + "> " + textConstants.EmailChanged
+							w.Write([]byte(response))
+						}
+					case http.StatusNotFound:
+						response := "<@" + user + "> " + textConstants.UserDoesNotExistText
+						w.Write([]byte(response))
+					case http.StatusInternalServerError:
+						response := "<@" + user + "> " + textConstants.ServerErrorText
+						w.Write([]byte(response))
+					default:
+						response := "<@" + user + "> " + textConstants.RequestErrorText
+						w.Write([]byte(response))
+					}
+				}
 			}
 
 		}
@@ -91,3 +117,23 @@ func (web WebHook) userLettersCount(value string) int {
 	}
 	return statusCode
 }
+
+func (web WebHook) userLettersCount(value string) int {
+	var valueJson entities.UserSendGrid
+	json.Unmarshal([]byte(value), &valueJson)
+	statusCode, err := web.client.UpdateSendgridEmail(valueJson.HostId,valueJson.Provider,valueJson.Email)
+	if err != nil {
+		return 0
+	}
+	if statusCode == http.StatusOK {
+		m := make(map[string]string)
+		m["method"] = textConstants.UpdateSendgridEmail
+		m[textConstants.ProviderKey] = valueJson.Provider
+		m[textConstants.HostIdKey] = valueJson.HostId
+		m[textConstants.EmailKey] = valueJson.Email
+		web.database.Save(m)
+	}
+	return statusCode
+}
+
+

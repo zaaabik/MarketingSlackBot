@@ -156,6 +156,38 @@ func (b *SlackBot) addLettersToUser(ctx context.Context, bot *slackbot.Bot, evt 
 	bot.ReplyWithAttachments(evt, []slack.Attachment{attach}, slackbot.WithoutTyping)
 }
 
+func (b *SlackBot) updateSendgridEmail(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
+	args := strings.Fields(evt.Text)
+	m := make(map[string]string)
+	m[textConstants.EmailKey] = args[len(args)-4]
+	m[textConstants.ProviderKey] = args[len(args)-1]
+	m[textConstants.HostIdKey] = args[len(args)-2]
+
+	value := entities.UserSendGrid{m[textConstants.HostIdKey], m[textConstants.ProviderKey], m[textConstants.EmailKey]}
+	jsonValue, err := json.Marshal(value)
+	_ = err
+
+	okAction := slack.AttachmentAction{
+		Text:  "yes",
+		Type:  "button",
+		Name:  "submit",
+		Value: string(jsonValue),
+	}
+	cancelAction := slack.AttachmentAction{
+		Text:  "no",
+		Type:  "button",
+		Name:  "cancel",
+		Value: "no",
+	}
+	str := "Do you want to set email:" + m[textConstants.EmailKey] + " to " + m[textConstants.HostIdKey] + " " + m[textConstants.ProviderKey] + "?"
+	attach := slack.Attachment{
+		Title:      str,
+		Actions:    []slack.AttachmentAction{okAction, cancelAction},
+		CallbackID: textConstants.UpdateSendgridEmail,
+	}
+	bot.ReplyWithAttachments(evt, []slack.Attachment{attach}, slackbot.WithoutTyping)
+}
+
 func (b *SlackBot) delDbHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	b.database.DeleteAll()
 	bot.Reply(evt, "db has been deleted", slackbot.WithoutTyping)
