@@ -50,7 +50,7 @@ func (web WebHook) Start() {
 					httpCode := web.userLettersCount(s.Actions[0].Value)
 
 					switch httpCode {
-					case http.StatusCreated:
+					case http.StatusOK:
 						{
 							response := "<@" + user + "> " + textConstants.ApproveEventText
 							w.Write([]byte(response))
@@ -77,7 +77,7 @@ func (web WebHook) Start() {
 					httpCode := web.updateSendgridEmail(s.Actions[0].Value)
 
 					switch httpCode {
-					case http.StatusOK:
+					case http.StatusCreated:
 						{
 							response := "<@" + user + "> " + textConstants.EmailChanged
 							w.Write([]byte(response))
