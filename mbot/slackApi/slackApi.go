@@ -14,6 +14,8 @@ import (
 	"golang.org/x/net/context"
 	"net/http"
 	"strings"
+	"log"
+	"regexp"
 )
 
 type SlackBot struct {
@@ -57,6 +59,7 @@ func (b *SlackBot) showHandler(ctx context.Context, bot *slackbot.Bot, evt *slac
 }
 
 func (b *SlackBot) unknownCommand(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
+	log.Println(evt.Msg)
 	//checking is message written by bot
 	if evt.User != "" {
 		bot.Reply(evt, textConstants.UnknownCommand, slackbot.WithoutTyping)
@@ -160,9 +163,16 @@ func (b *SlackBot) addLettersToUser(ctx context.Context, bot *slackbot.Bot, evt 
 func (b *SlackBot) updateSendgridEmail(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
-	m[textConstants.EmailKey] = args[len(args)-4]
 	m[textConstants.ProviderKey] = args[len(args)-1]
 	m[textConstants.HostIdKey] = args[len(args)-2]
+	re := regexp.MustCompile(`(\w[-._\w]*\w@\w[-._\w]*\w\.\w{2,3})`)
+	email := re.FindStringSubmatch(evt.Msg.Text)
+	if len(email) > 0 {
+		m[textConstants.EmailKey] = email[0]
+	}else{
+		return
+	}
+
 
 	value := entities.UserSendGrid{m[textConstants.HostIdKey], m[textConstants.ProviderKey], m[textConstants.EmailKey]}
 	jsonValue, err := json.Marshal(value)

@@ -116,8 +116,10 @@ func (client *MarketingClient) UpdateSendgridEmail(userId string, provider strin
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
+		log.Print(err)
 		return 0, err
 	}
+
 	return response.StatusCode, nil
 
 }
