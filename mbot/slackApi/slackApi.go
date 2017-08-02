@@ -201,14 +201,16 @@ func (b *SlackBot) updateSendgridEmail(ctx context.Context, bot *slackbot.Bot, e
 
 func (b *SlackBot) createScenarioByCampaign(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	args := strings.Fields(evt.Text)
-	id := strings.Split(args[len(args)-2], "/")
-	log.Print(id[len(id)-1])
+	id := strings.Split(args[len(args)-1], "/")
+	campaignId :=(id[len(id) - 1])
+	result := strings.Replace(campaignId,">","",-1)
+	log.Print(result)
 	m := make(map[string]string)
-	m[textConstants.ScenarioName] = args[len(args)-1]
-	m[textConstants.CampaignId] = id[len(id)-1]
+	m[textConstants.ScenarioName] = args[len(args)-2]
+	m[textConstants.CampaignId] = result
 
 	go func() {
-		httpCode, err := b.client.CreateScenarioByCampaign(m[textConstants.ScenarioName], m[textConstants.CampaignId])
+		httpCode, err := b.client.CreateScenarioByCampaign(m[textConstants.CampaignId], m[textConstants.ScenarioName])
 		if err != nil {
 			log.Print(err)
 			return
