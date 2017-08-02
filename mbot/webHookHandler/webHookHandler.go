@@ -66,7 +66,7 @@ func (web WebHook) Start() {
 						w.Write([]byte(response))
 					}
 				}
-			case textConstants.UpdateSendgridEmail:
+			case textConstants.UpdateSendgridEmailMethod:
 				{
 					user := s.User.ID
 					if s.Actions[0].Value == "no" {
@@ -127,7 +127,7 @@ func (web WebHook) updateSendgridEmail(value string) int {
 	}
 	if statusCode == http.StatusOK {
 		m := make(map[string]string)
-		m["method"] = textConstants.UpdateSendgridEmail
+		m["method"] = textConstants.UpdateSendgridEmailMethod
 		m[textConstants.ProviderKey] = valueJson.Provider
 		m[textConstants.HostIdKey] = valueJson.HostId
 		m[textConstants.EmailKey] = valueJson.Email

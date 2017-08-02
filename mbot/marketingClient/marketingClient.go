@@ -106,7 +106,7 @@ func (client *MarketingClient) UpdateSendgridEmail(userId string, provider strin
 	buffer.WriteString(form.Encode())
 
 	log.Println(form.Encode())
-	req, err := http.NewRequest("PUT", client.baseApiUrl+textConstants.UpdateSendgridEmail, buffer)
+	req, err := http.NewRequest("PUT", client.baseApiUrl+textConstants.UpdateSendgridEmailMethod, buffer)
 	if err != nil {
 		log.Print(err)
 		return http.StatusOK, err
@@ -121,5 +121,30 @@ func (client *MarketingClient) UpdateSendgridEmail(userId string, provider strin
 	}
 
 	return response.StatusCode, nil
+}
 
+func (client *MarketingClient) CreateScenarioByCampaign(campaignId string, scenarioName string) (int, error) {
+	form := url.Values{}
+	form.Set(textConstants.CampaignId, campaignId)
+	form.Set(textConstants.ScenarioName, scenarioName)
+
+	buffer := new(bytes.Buffer)
+	buffer.WriteString(form.Encode())
+
+	log.Println(form.Encode())
+	req, err := http.NewRequest("PUT", client.baseApiUrl+textConstants.CreateScenarioByCampaignMethod, buffer)
+	if err != nil {
+		log.Print(err)
+		return http.StatusOK, err
+	}
+
+	req.Header.Add(client.httpTokenKey, client.httpTokenValue)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	response, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Print(err)
+		return 0, err
+	}
+
+	return response.StatusCode, nil
 }
