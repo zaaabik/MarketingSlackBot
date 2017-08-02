@@ -8,7 +8,7 @@ import (
 	"github.com/radario/MarketingSlackBot/mbot/db"
 	"github.com/radario/MarketingSlackBot/mbot/entities"
 	"github.com/radario/MarketingSlackBot/mbot/marketingClient"
-	"github.com/radario/MarketingSlackBot/mbot/messagesRegExp"
+	"github.com/radario/MarketingSlackBot/mbot/regularExpression"
 	"github.com/radario/MarketingSlackBot/mbot/textConstants"
 	"github.com/radario/MarketingSlackBot/mbot/webHookHandler"
 	"golang.org/x/net/context"
@@ -37,15 +37,15 @@ func (b *SlackBot) Start() {
 	bot := slackbot.New(b.botToken)
 	go b.server.Start()
 	toMe := bot.Messages(slackbot.DirectMessage, slackbot.DirectMention).Subrouter()
-	toMe.Hear(messagesRegExp.AddLettersToUserRegExp).MessageHandler(b.addLettersToUser)
-	toMe.Hear(messagesRegExp.GetTransactionCountRegExp).MessageHandler(b.getTransactionCountHandler)
-	toMe.Hear(messagesRegExp.GetCustomersCountRegExp).MessageHandler(b.getCustomersCountHandler)
-	toMe.Hear(messagesRegExp.UpdateSendgridEmailRegExp).MessageHandler(b.updateSendgridEmail)
-	toMe.Hear(messagesRegExp.CreateScenarioByCompainRegExp).MessageHandler(b.createScenarioByCampaign)
-	toMe.Hear(messagesRegExp.ShowDbRegExp).MessageHandler(b.showHandler)
-	toMe.Hear(messagesRegExp.DeleteDbRegExp).MessageHandler(b.delDbHandler)
-	toMe.Hear(messagesRegExp.HelpRegExp).MessageHandler(b.showHelp)
-	toMe.Hear(messagesRegExp.AllRegExp).MessageHandler(b.unknownCommand)
+	toMe.Hear(regularExpression.AddLettersToUserRegExp).MessageHandler(b.addLettersToUser)
+	toMe.Hear(regularExpression.GetTransactionCountRegExp).MessageHandler(b.getTransactionCountHandler)
+	toMe.Hear(regularExpression.GetCustomersCountRegExp).MessageHandler(b.getCustomersCountHandler)
+	toMe.Hear(regularExpression.UpdateSendgridEmailRegExp).MessageHandler(b.updateSendgridEmail)
+	toMe.Hear(regularExpression.CreateScenarioByCompainRegExp).MessageHandler(b.createScenarioByCampaign)
+	toMe.Hear(regularExpression.ShowDbRegExp).MessageHandler(b.showHandler)
+	toMe.Hear(regularExpression.DeleteDbRegExp).MessageHandler(b.delDbHandler)
+	toMe.Hear(regularExpression.HelpRegExp).MessageHandler(b.showHelp)
+	toMe.Hear(regularExpression.AllRegExp).MessageHandler(b.unknownCommand)
 	bot.Run()
 }
 

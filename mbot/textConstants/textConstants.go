@@ -8,11 +8,12 @@ const (
 	ApproveEventText     = "added"
 	UnknownCommand       = "unknown command\nwrite .help "
 	EmailChanged         = "email changed!"
-	Help                 = `.add [letters Count] letters [host_id] [provider]
-		.get transaction count [host_id] [provider]
-		.get customers count [host_id] [provider]
-		.set [new_email] to [host_id] [provider]
-		example .add 1234 letters 13 radario	`
+	Help                 = `.add [letters Count] letters [host id] [provider]
+		.get transaction count [host id] [provider]
+		.get customers count [host id] [provider]
+		.set [new email] to [host id] [provider]
+		.create scenario [scenario name] [campaign id]
+		example .add 1234 letters 13 radario`
 
 	HostIdKey       = "host_id"
 	ProviderKey     = "provider"

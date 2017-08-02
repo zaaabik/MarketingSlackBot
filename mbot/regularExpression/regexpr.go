@@ -1,4 +1,4 @@
-package messagesRegExp
+package regularExpression
 
 const (
 	AddLettersToUserRegExp        = `((<@\w+>\s*)+|(^\s*))(\.add (-)?\d* letters \w+ \w+\s*$)`
