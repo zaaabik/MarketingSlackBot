@@ -12,7 +12,7 @@ const (
 	.add [letters Count] letters [host id] [provider]
 	.get transaction count [host id] [provider]
 	.get customers count [host id] [provider]
-	.set [new email] to [host id] [provider]
+	.set sendgrid email [new email] to [host id] [provider]
 	.create scenario [scenario name] [link to company]
 	example .add 1234 letters 13 radario`
 
