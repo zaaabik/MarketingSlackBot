@@ -202,32 +202,33 @@ func (b *SlackBot) updateSendgridEmail(ctx context.Context, bot *slackbot.Bot, e
 func (b *SlackBot) createScenarioByCampaign(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	args := strings.Fields(evt.Text)
 	id := strings.Split(args[len(args)-1], "/")
-	campaignId :=(id[len(id) - 1])
-	result := strings.Replace(campaignId,">","",-1)
+	campaignId := (id[len(id)-1])
+	result := strings.Replace(campaignId, ">", "", -1)
 	log.Print(result)
 	m := make(map[string]string)
 	m[textConstants.ScenarioName] = args[len(args)-2]
 	m[textConstants.CampaignId] = result
 
-	go func() {
-		httpCode, err := b.client.CreateScenarioByCampaign(m[textConstants.CampaignId], m[textConstants.ScenarioName])
-		if err != nil {
-			log.Print(err)
-			return
+	httpCode, err := b.client.CreateScenarioByCampaign(m[textConstants.CampaignId], m[textConstants.ScenarioName])
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	switch httpCode {
+	case http.StatusCreated:
+		{
+			bot.Reply(evt, "Created!", slackbot.WithoutTyping)
 		}
-		switch httpCode {
-		case http.StatusCreated:
-			{
-				bot.Reply(evt, "Created!", slackbot.WithoutTyping)
-			}
-		case http.StatusNotFound:
-			{
-				bot.Reply(evt, "Campaign doesn`t exist", slackbot.WithoutTyping)
-			}
-		default:
-			bot.Reply(evt, "fail", slackbot.WithoutTyping)
+	case http.StatusNotFound:
+		{
+			bot.Reply(evt, "Campaign doesn`t exist", slackbot.WithoutTyping)
 		}
-	}()
+	default:
+		bot.Reply(evt, "fail", slackbot.WithoutTyping)
+	}
+	m["user"] = evt.User
+	m["response"] = string(httpCode)
+	b.database.Save(m)
 }
 
 func (b *SlackBot) delDbHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
