@@ -75,7 +75,6 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 	m[textConstants.ProviderKey] = args[len(args)-1]
 	m[textConstants.HostIdKey] = args[len(args)-2]
 	response, err, httpCode := b.client.GetTransactionCount(m[textConstants.HostIdKey], m[textConstants.ProviderKey])
-
 	if err != nil {
 		bot.Reply(evt, "<@"+evt.User+"> "+textConstants.RequestErrorText, slackbot.WithoutTyping)
 		return
@@ -205,7 +204,6 @@ func (b *SlackBot) createScenarioByCampaign(ctx context.Context, bot *slackbot.B
 	id := strings.Split(args[len(args)-1], "/")
 	campaignId := (id[len(id)-1])
 	result := strings.Replace(campaignId, ">", "", -1)
-	log.Print(result)
 	m := make(map[string]string)
 	m[textConstants.ScenarioName] = args[len(args)-2]
 	m[textConstants.CampaignId] = result

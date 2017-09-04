@@ -131,7 +131,6 @@ func (client *MarketingClient) CreateScenarioByCampaign(campaignId string, scena
 	buffer := new(bytes.Buffer)
 	buffer.WriteString(form.Encode())
 
-	log.Println(form.Encode())
 	req, err := http.NewRequest("PUT", client.baseApiUrl+textConstants.CreateScenarioByCampaignMethod, buffer)
 	if err != nil {
 		log.Print(err)
