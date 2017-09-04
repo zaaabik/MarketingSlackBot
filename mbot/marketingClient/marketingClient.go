@@ -79,7 +79,6 @@ func (client *MarketingClient) AddLettersTohost(userId string, provider string, 
 	buffer := new(bytes.Buffer)
 	buffer.WriteString(form.Encode())
 
-	log.Println(form.Encode())
 	req, err := http.NewRequest("PUT", client.baseApiUrl+textConstants.AddUserLetterCountMethod, buffer)
 	if err != nil {
 		log.Print(err)

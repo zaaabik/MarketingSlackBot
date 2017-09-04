@@ -61,7 +61,6 @@ func (b *SlackBot) showHandler(ctx context.Context, bot *slackbot.Bot, evt *slac
 }
 
 func (b *SlackBot) unknownCommand(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
-	log.Println(evt.Msg)
 	//checking is message written by bot
 	if evt.User != "" {
 		bot.Reply(evt, textConstants.UnknownCommand, slackbot.WithoutTyping)
