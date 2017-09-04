@@ -15,6 +15,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -227,7 +228,7 @@ func (b *SlackBot) createScenarioByCampaign(ctx context.Context, bot *slackbot.B
 		bot.Reply(evt, "fail", slackbot.WithoutTyping)
 	}
 	m["user"] = evt.User
-	m["response"] = string(httpCode)
+	m["http_status_code"] = strconv.Itoa(httpCode)
 	m["method"] = textConstants.CreateScenarioByCampaignMethod
 	b.database.Save(m)
 }
