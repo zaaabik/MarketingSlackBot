@@ -137,7 +137,7 @@ func (b *SlackBot) addLettersToUser(ctx context.Context, bot *slackbot.Bot, evt 
 	m[textConstants.LettersCountKey] = args[len(args)-4]
 	m[textConstants.ProviderKey] = args[len(args)-1]
 	m[textConstants.HostIdKey] = args[len(args)-2]
-	value := entities.UserLettersCount{m[textConstants.HostIdKey], m[textConstants.ProviderKey], m[textConstants.LettersCountKey]}
+	value := entities.UserLettersCount{m[textConstants.HostIdKey], m[textConstants.ProviderKey], m[textConstants.LettersCountKey], evt.User}
 	jsonValue, err := json.Marshal(value)
 	_ = err
 	okAction := slack.AttachmentAction{
@@ -174,7 +174,7 @@ func (b *SlackBot) updateSendgridEmail(ctx context.Context, bot *slackbot.Bot, e
 		return
 	}
 
-	value := entities.UserSendGrid{m[textConstants.HostIdKey], m[textConstants.ProviderKey], m[textConstants.EmailKey]}
+	value := entities.UserSendGrid{m[textConstants.HostIdKey], m[textConstants.ProviderKey], m[textConstants.EmailKey], evt.User}
 	jsonValue, err := json.Marshal(value)
 	_ = err
 
@@ -228,6 +228,7 @@ func (b *SlackBot) createScenarioByCampaign(ctx context.Context, bot *slackbot.B
 	}
 	m["user"] = evt.User
 	m["response"] = string(httpCode)
+	m["method"] = textConstants.CreateScenarioByCampaignMethod
 	b.database.Save(m)
 }
 

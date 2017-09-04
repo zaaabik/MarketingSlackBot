@@ -33,7 +33,7 @@ func (web WebHook) Start() {
 		res, _ := ioutil.ReadAll(r.Body)
 
 		if len(res) < 8 {
-			//wrong webhook from slakc
+			//wrong webhook from slack
 		} else {
 			jsonStr, _ := url.QueryUnescape(string(res)[8:])
 			var s slack.AttachmentActionCallback
@@ -110,6 +110,7 @@ func (web WebHook) userLettersCount(value string) int {
 	if statusCode == http.StatusOK {
 		m := make(map[string]string)
 		m["method"] = textConstants.AddUserLetterCountMethod
+		m["user"] = valueJson.UserId
 		m[textConstants.ProviderKey] = valueJson.Provider
 		m[textConstants.HostIdKey] = valueJson.HostId
 		m[textConstants.LettersCountKey] = valueJson.LettersCount
@@ -131,6 +132,7 @@ func (web WebHook) updateSendgridEmail(value string) int {
 		m[textConstants.ProviderKey] = valueJson.Provider
 		m[textConstants.HostIdKey] = valueJson.HostId
 		m[textConstants.EmailKey] = valueJson.Email
+		m["user"] = valueJson.UserId
 		web.database.Save(m)
 	}
 	return statusCode
