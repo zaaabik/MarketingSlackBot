@@ -5,7 +5,6 @@ import (
 	"github.com/radario/MarketingSlackBot/mbot/db"
 	"github.com/radario/MarketingSlackBot/mbot/marketingClient"
 	"github.com/radario/MarketingSlackBot/mbot/slackApi"
-	"github.com/radario/MarketingSlackBot/mbot/textConstants"
 	"os"
 )
 
