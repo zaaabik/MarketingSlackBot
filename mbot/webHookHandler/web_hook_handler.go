@@ -2,6 +2,7 @@ package webHookHandler
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/nlopes/slack"
 	"github.com/radario/MarketingSlackBot/mbot/db"
@@ -18,6 +19,8 @@ type WebHook struct {
 	database db.Store
 }
 
+const answerToUserTemplate = "<%s> %s"
+
 func NewWebHookHandler(client *marketingClient.MarketingClient, database db.Store) *WebHook {
 	return &WebHook{client, database}
 }
@@ -27,75 +30,28 @@ type j struct {
 }
 
 func (web WebHook) Start() {
-
 	r := chi.NewRouter()
 	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
 		res, _ := ioutil.ReadAll(r.Body)
 
 		if len(res) < 8 {
-			//wrong webhook from slack
-		} else {
-			jsonStr, _ := url.QueryUnescape(string(res)[8:])
-			var s slack.AttachmentActionCallback
-			json.Unmarshal([]byte(jsonStr), &s)
-			switch s.CallbackID {
-			case textConstants.AddUserLetterCountMethod:
-				{
-					user := s.User.ID
-					if s.Actions[0].Value == "no" {
-						response := "<@" + user + "> " + textConstants.CanceledEventText
-						w.Write([]byte(response))
-						return
-					}
-					httpCode := web.userLettersCount(s.Actions[0].Value)
-
-					switch httpCode {
-					case http.StatusOK:
-						{
-							response := "<@" + user + "> " + textConstants.ApproveEventText
-							w.Write([]byte(response))
-						}
-					case http.StatusNotFound:
-						response := "<@" + user + "> " + textConstants.UserDoesNotExistText
-						w.Write([]byte(response))
-					case http.StatusInternalServerError:
-						response := "<@" + user + "> " + textConstants.ServerErrorText
-						w.Write([]byte(response))
-					default:
-						response := "<@" + user + "> " + textConstants.RequestErrorText
-						w.Write([]byte(response))
-					}
-				}
-			case textConstants.UpdateSendgridEmailMethod:
-				{
-					user := s.User.ID
-					if s.Actions[0].Value == "no" {
-						response := "<@" + user + "> " + textConstants.CanceledEventText
-						w.Write([]byte(response))
-						return
-					}
-					httpCode := web.updateSendgridEmail(s.Actions[0].Value)
-
-					switch httpCode {
-					case http.StatusCreated:
-						{
-							response := "<@" + user + "> " + textConstants.EmailChanged
-							w.Write([]byte(response))
-						}
-					case http.StatusNotFound:
-						response := "<@" + user + "> " + textConstants.UserDoesNotExistText
-						w.Write([]byte(response))
-					case http.StatusInternalServerError:
-						response := "<@" + user + "> " + textConstants.ServerErrorText
-						w.Write([]byte(response))
-					default:
-						response := "<@" + user + "> " + textConstants.RequestErrorText
-						w.Write([]byte(response))
-					}
-				}
-			}
-
+			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
+		jsonStr, _ := url.QueryUnescape(string(res)[8:])
+		var attachmentsCallback slack.AttachmentActionCallback
+		json.Unmarshal([]byte(jsonStr), &attachmentsCallback)
+		switch attachmentsCallback.CallbackID {
+		case textConstants.AddUserLetterCountMethod:
+			{
+				addLettersMethodAnswer(&w, &attachmentsCallback, &web)
+			}
+		case textConstants.UpdateSendgridEmailMethod:
+			{
+				updateSendgridAnswer(&w, &attachmentsCallback, &web)
+			}
+		}
+
 	})
 	http.ListenAndServe(":1113", r)
 }
@@ -136,4 +92,58 @@ func (web WebHook) updateSendgridEmail(value string) int {
 		web.database.Save(m)
 	}
 	return statusCode
+}
+
+func addLettersMethodAnswer(w *http.ResponseWriter, callback *slack.AttachmentActionCallback, web *WebHook) {
+	user := callback.User.ID
+	if callback.Actions[0].Value == "no" {
+		response := "<@" + user + "> " + textConstants.CanceledEventText
+		(*w).Write([]byte(response))
+		return
+	}
+	httpCode := web.userLettersCount(callback.Actions[0].Value)
+
+	switch httpCode {
+	case http.StatusOK:
+		{
+			response := "<@" + user + "> " + textConstants.ApproveEventText
+			(*w).Write([]byte(response))
+		}
+	case http.StatusNotFound:
+		response := "<@" + user + "> " + textConstants.UserDoesNotExistText
+		(*w).Write([]byte(response))
+	case http.StatusInternalServerError:
+		response := "<@" + user + "> " + textConstants.ServerErrorText
+		(*w).Write([]byte(response))
+	default:
+		response := "<@" + user + "> " + textConstants.RequestErrorText
+		(*w).Write([]byte(response))
+	}
+}
+
+func updateSendgridAnswer(w *http.ResponseWriter, callback *slack.AttachmentActionCallback, web *WebHook) {
+	user := callback.User.ID
+	if callback.Actions[0].Value == "no" {
+		response := "<@" + user + "> " + textConstants.CanceledEventText
+		(*w).Write([]byte(response))
+		return
+	}
+	httpCode := web.updateSendgridEmail(callback.Actions[0].Value)
+
+	switch httpCode {
+	case http.StatusCreated:
+		{
+			response := fmt.Sprintf(answerToUserTemplate, user, textConstants.ApproveEventText)
+			(*w).Write([]byte(response))
+		}
+	case http.StatusNotFound:
+		response := fmt.Sprintf(answerToUserTemplate, user, textConstants.UserDoesNotExistText)
+		(*w).Write([]byte(response))
+	case http.StatusInternalServerError:
+		response := fmt.Sprintf(answerToUserTemplate, user, textConstants.ServerErrorText)
+		(*w).Write([]byte(response))
+	default:
+		response := fmt.Sprintf(answerToUserTemplate, user, textConstants.RequestErrorText)
+		(*w).Write([]byte(response))
+	}
 }
