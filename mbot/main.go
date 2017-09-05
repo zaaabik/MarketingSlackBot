@@ -28,6 +28,7 @@ func main() {
 	}
 	var database db.Store
 	database, err = db.NewBoltDb(config.DatabasePath)
+	defer database.Close()
 	if err != nil {
 		os.Exit(WrongFlagsExitCode)
 	}

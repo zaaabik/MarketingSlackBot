@@ -75,11 +75,11 @@ func (b *BoltDb) DeleteAll() {
 		tx.DeleteBucket([]byte(dbBucket))
 		return nil
 	})
-	if err != nil{
+	if err != nil {
 		log.Print(err)
 	}
 }
 
-func (b *BoltDb) CloseDataBase() {
+func (b *BoltDb) Close() {
 	b.db.Close()
 }
