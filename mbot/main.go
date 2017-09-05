@@ -22,15 +22,16 @@ const (
 )
 
 func main() {
-	_, err := flags.Parse(&config)
-	if err != nil {
-		os.Exit(CantCreateDatabaseExitCode)
+	flags.Parse(&config)
+	if config.HttpTokenKey == "" || config.BotUserToken == "" ||
+		config.BaseApiUrl == "" {
+		os.Exit(WrongFlagsExitCode)
 	}
 	var database db.Store
-	database, err = db.NewBoltDb(config.DatabasePath)
+	database, err := db.NewBoltDb(config.DatabasePath)
 	defer database.Close()
 	if err != nil {
-		os.Exit(WrongFlagsExitCode)
+		os.Exit(CantCreateDatabaseExitCode)
 	}
 	client := marketingClient.NewMarketingClient(config.BaseApiUrl, config.HttpTokenValue, config.HttpTokenKey)
 	bot := slackApi.NewBot(config.BotUserToken, &database, client)
