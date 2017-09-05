@@ -5,6 +5,7 @@ import (
 	"github.com/radario/MarketingSlackBot/mbot/db"
 	"github.com/radario/MarketingSlackBot/mbot/marketingClient"
 	"github.com/radario/MarketingSlackBot/mbot/slackApi"
+	"github.com/radario/MarketingSlackBot/mbot/textConstants"
 	"os"
 )
 
@@ -16,13 +17,21 @@ var config struct {
 	HttpTokenKey   string `long:"http_token_key" env:"HTTP_TOKEN_KEY"`
 }
 
+const (
+	CantCreateDatabaseExitCode = 1
+	WrongFlagsExitCode         = 2
+)
+
 func main() {
-	 _, err := flags.Parse(&config)
-	if err == nil{
-		os.Exit(1)
+	_, err := flags.Parse(&config)
+	if err != nil {
+		os.Exit(CantCreateDatabaseExitCode)
 	}
 	var database db.Store
-	database = db.NewBoltDb(config.DatabasePath)
+	database, err = db.NewBoltDb(config.DatabasePath)
+	if err != nil {
+		os.Exit(WrongFlagsExitCode)
+	}
 	client := marketingClient.NewMarketingClient(config.BaseApiUrl, config.HttpTokenValue, config.HttpTokenKey)
 	bot := slackApi.NewBot(config.BotUserToken, &database, client)
 	bot.Start()

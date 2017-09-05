@@ -1,37 +1,32 @@
 package db
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/boltdb/bolt"
 	"log"
 	"time"
-	"encoding/json"
 )
 
-const dbBucket string = "marketingClient"
+const dbBucket = "marketingClient"
 
 type BoltDb struct {
-	dbPath string
+	db *bolt.DB
 }
 
-func NewBoltDb(path string) *BoltDb {
-	return &BoltDb{path}
+func NewBoltDb(path string) (*BoltDb, error) {
+	db, err := bolt.Open(path, 0600, nil)
+	return &BoltDb{db}, err
 }
 
 func (b *BoltDb) Save(m map[string]string) {
-	db, err := bolt.Open(b.dbPath, 0600, nil)
-	defer db.Close()
-	if err != nil {
-		log.Println(err)
-	}
-
 	enc, err := json.Marshal(m)
-	if err != nil{
+	if err != nil {
 		log.Print(err)
 		return
 	}
 
-	err = db.Update(func(tx *bolt.Tx) error {
+	err = b.db.Update(func(tx *bolt.Tx) error {
 		req, err := tx.CreateBucketIfNotExists([]byte(dbBucket))
 
 		if err != nil {
@@ -50,20 +45,13 @@ func (b *BoltDb) Save(m map[string]string) {
 
 }
 func (b *BoltDb) GetAll() {
-	db, err := bolt.Open(b.dbPath, 0600, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	defer db.Close()
-
-	err = db.View(func(tx *bolt.Tx) error {
+	err := b.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(dbBucket))
 		if b == nil {
 			log.Println("file is empty")
 			return nil
 		}
-		err = b.ForEach(func(k, v []byte) error {
+		err := b.ForEach(func(k, v []byte) error {
 			fmt.Printf("key=%s, value=%s\n", k, v)
 			return nil
 		})
@@ -79,12 +67,7 @@ func (b *BoltDb) GetAll() {
 }
 
 func (b *BoltDb) DeleteAll() {
-	db, err := bolt.Open(b.dbPath, 0600, nil)
-	if err != nil {
-		log.Println(err)
-	}
-	defer db.Close()
-	db.Update(func(tx *bolt.Tx) error {
+	b.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(dbBucket))
 		if b == nil {
 			return nil
@@ -92,4 +75,8 @@ func (b *BoltDb) DeleteAll() {
 		tx.DeleteBucket([]byte(dbBucket))
 		return nil
 	})
+}
+
+func (b *BoltDb) CloseDataBase() {
+	b.db.Close()
 }
