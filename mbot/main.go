@@ -5,6 +5,7 @@ import (
 	"github.com/radario/MarketingSlackBot/mbot/db"
 	"github.com/radario/MarketingSlackBot/mbot/marketingClient"
 	"github.com/radario/MarketingSlackBot/mbot/slackApi"
+	"os"
 )
 
 var config struct {
@@ -16,7 +17,10 @@ var config struct {
 }
 
 func main() {
-	flags.Parse(&config)
+	 _, err := flags.Parse(&config)
+	if err == nil{
+		os.Exit(1)
+	}
 	var database db.Store
 	database = db.NewBoltDb(config.DatabasePath)
 	client := marketingClient.NewMarketingClient(config.BaseApiUrl, config.HttpTokenValue, config.HttpTokenKey)
