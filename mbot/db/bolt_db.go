@@ -22,11 +22,10 @@ func NewBoltDb(path string) (*BoltDb, error) {
 	return &BoltDb{db}, err
 }
 
-func (b *BoltDb) Save(m map[string]string) {
+func (b *BoltDb) Save(m map[string]string) error{
 	enc, err := json.Marshal(m)
 	if err != nil {
-		log.Print(err)
-		return
+		return err
 	}
 
 	err = b.db.Update(func(tx *bolt.Tx) error {
@@ -36,16 +35,16 @@ func (b *BoltDb) Save(m map[string]string) {
 			return err
 		}
 
-		err = req.Put([]byte(time.Now().String()), enc)
+		err = req.Put([]byte(time.Now().Format(time.UnixDate)), enc)
 		if err != nil {
 			return err
 		}
 		return nil
 	})
 	if err != nil {
-		log.Println(err)
+		return err
 	}
-
+	return nil
 }
 func (b *BoltDb) GetAll() {
 	err := b.db.View(func(tx *bolt.Tx) error {
