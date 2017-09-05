@@ -40,7 +40,7 @@ func (b *BoltDb) Save(m map[string]string) {
 		return nil
 	})
 	if err != nil {
-		log.Println(nil)
+		log.Println(err)
 	}
 
 }
@@ -67,7 +67,7 @@ func (b *BoltDb) GetAll() {
 }
 
 func (b *BoltDb) DeleteAll() {
-	b.db.Update(func(tx *bolt.Tx) error {
+	err := b.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(dbBucket))
 		if b == nil {
 			return nil
@@ -75,6 +75,9 @@ func (b *BoltDb) DeleteAll() {
 		tx.DeleteBucket([]byte(dbBucket))
 		return nil
 	})
+	if err != nil{
+		log.Print(err)
+	}
 }
 
 func (b *BoltDb) CloseDataBase() {
