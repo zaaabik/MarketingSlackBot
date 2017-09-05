@@ -10,9 +10,9 @@ import (
 	"github.com/radario/MarketingSlackBot/mbot/marketingClient"
 	"github.com/radario/MarketingSlackBot/mbot/textConstants"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
-	"log"
 )
 
 type WebHook struct {
@@ -72,7 +72,7 @@ func (web WebHook) userLettersCount(value string) int {
 		m[textConstants.HostIdKey] = valueJson.HostId
 		m[textConstants.LettersCountKey] = valueJson.LettersCount
 		err = web.database.Save(m)
-		if err != nil{
+		if err != nil {
 			log.Print(err)
 		}
 
@@ -95,7 +95,7 @@ func (web WebHook) updateSendgridEmail(value string) int {
 		m[textConstants.EmailKey] = valueJson.Email
 		m["user"] = valueJson.UserId
 		err = web.database.Save(m)
-		if err != nil{
+		if err != nil {
 			log.Print(err)
 		}
 	}
@@ -105,7 +105,7 @@ func (web WebHook) updateSendgridEmail(value string) int {
 func addLettersMethodAnswer(w *http.ResponseWriter, callback *slack.AttachmentActionCallback, web *WebHook) {
 	user := callback.User.ID
 	if callback.Actions[0].Value == "no" {
-		response := fmt.Sprint(answerToUserTemplate,user,textConstants.CanceledEventText)
+		response := fmt.Sprint(answerToUserTemplate, user, textConstants.CanceledEventText)
 		(*w).Write([]byte(response))
 		return
 	}
@@ -114,17 +114,17 @@ func addLettersMethodAnswer(w *http.ResponseWriter, callback *slack.AttachmentAc
 	switch httpCode {
 	case http.StatusOK:
 		{
-			response := fmt.Sprint(answerToUserTemplate,user,textConstants.ApproveEventText)
+			response := fmt.Sprint(answerToUserTemplate, user, textConstants.ApproveEventText)
 			(*w).Write([]byte(response))
 		}
 	case http.StatusNotFound:
-		response := fmt.Sprint(answerToUserTemplate,user,textConstants.UserDoesNotExistText)
+		response := fmt.Sprint(answerToUserTemplate, user, textConstants.UserDoesNotExistText)
 		(*w).Write([]byte(response))
 	case http.StatusInternalServerError:
-		response := fmt.Sprint(answerToUserTemplate,user,textConstants.ServerErrorText)
+		response := fmt.Sprint(answerToUserTemplate, user, textConstants.ServerErrorText)
 		(*w).Write([]byte(response))
 	default:
-		response := fmt.Sprint(answerToUserTemplate,user,textConstants.RequestErrorText)
+		response := fmt.Sprint(answerToUserTemplate, user, textConstants.RequestErrorText)
 		(*w).Write([]byte(response))
 	}
 }
