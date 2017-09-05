@@ -15,6 +15,9 @@ type BoltDb struct {
 }
 
 func NewBoltDb(path string) (*BoltDb, error) {
+	if path == "" {
+		path = "database.db"
+	}
 	db, err := bolt.Open(path, 0600, nil)
 	return &BoltDb{db}, err
 }
