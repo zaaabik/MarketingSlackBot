@@ -20,7 +20,7 @@ type WebHook struct {
 	database db.Store
 }
 
-const answerToUserTemplate = "<%s> %s"
+const answerToUserTemplate = "<@%s> %s"
 
 func NewWebHookHandler(client *marketingClient.MarketingClient, database db.Store) *WebHook {
 	return &WebHook{client, database}
@@ -52,7 +52,6 @@ func (web WebHook) Start() {
 				updateSendgridAnswer(&w, &attachmentsCallback, &web)
 			}
 		}
-
 	})
 	http.ListenAndServe(":1113", r)
 }
@@ -60,7 +59,7 @@ func (web WebHook) Start() {
 func (web WebHook) userLettersCount(value string) int {
 	var valueJson entities.UserLettersCount
 	json.Unmarshal([]byte(value), &valueJson)
-	statusCode, err := web.client.AddLettersTohost(valueJson.HostId, valueJson.Provider, valueJson.LettersCount)
+	statusCode, err := web.client.AddLettersToHost(valueJson.HostId, valueJson.Provider, valueJson.LettersCount)
 	if err != nil {
 		return 0
 	}
@@ -105,7 +104,7 @@ func (web WebHook) updateSendgridEmail(value string) int {
 func addLettersMethodAnswer(w *http.ResponseWriter, callback *slack.AttachmentActionCallback, web *WebHook) {
 	user := callback.User.ID
 	if callback.Actions[0].Value == "no" {
-		response := fmt.Sprint(answerToUserTemplate, user, textConstants.CanceledEventText)
+		response := fmt.Sprintf(answerToUserTemplate, user, textConstants.CanceledEventText)
 		(*w).Write([]byte(response))
 		return
 	}
@@ -114,17 +113,17 @@ func addLettersMethodAnswer(w *http.ResponseWriter, callback *slack.AttachmentAc
 	switch httpCode {
 	case http.StatusOK:
 		{
-			response := fmt.Sprint(answerToUserTemplate, user, textConstants.ApproveEventText)
+			response := fmt.Sprintf(answerToUserTemplate, user, textConstants.ApproveEventText)
 			(*w).Write([]byte(response))
 		}
 	case http.StatusNotFound:
-		response := fmt.Sprint(answerToUserTemplate, user, textConstants.UserDoesNotExistText)
+		response := fmt.Sprintf(answerToUserTemplate, user, textConstants.UserDoesNotExistText)
 		(*w).Write([]byte(response))
 	case http.StatusInternalServerError:
-		response := fmt.Sprint(answerToUserTemplate, user, textConstants.ServerErrorText)
+		response := fmt.Sprintf(answerToUserTemplate, user, textConstants.ServerErrorText)
 		(*w).Write([]byte(response))
 	default:
-		response := fmt.Sprint(answerToUserTemplate, user, textConstants.RequestErrorText)
+		response := fmt.Sprintf(answerToUserTemplate, user, textConstants.RequestErrorText)
 		(*w).Write([]byte(response))
 	}
 }
@@ -132,7 +131,7 @@ func addLettersMethodAnswer(w *http.ResponseWriter, callback *slack.AttachmentAc
 func updateSendgridAnswer(w *http.ResponseWriter, callback *slack.AttachmentActionCallback, web *WebHook) {
 	user := callback.User.ID
 	if callback.Actions[0].Value == "no" {
-		response := "<@" + user + "> " + textConstants.CanceledEventText
+		response := fmt.Sprintf(answerToUserTemplate, user, textConstants.CanceledEventText)
 		(*w).Write([]byte(response))
 		return
 	}
