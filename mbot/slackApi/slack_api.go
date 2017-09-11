@@ -3,6 +3,7 @@ package slackApi
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/adampointer/go-slackbot"
 	"github.com/nlopes/slack"
 	"github.com/radario/MarketingSlackBot/mbot/db"
@@ -18,6 +19,8 @@ import (
 	"strconv"
 	"strings"
 )
+
+const answerToUserTemplate = "<%s> %s"
 
 type SlackBot struct {
 	server   *webHookHandler.WebHook
@@ -51,9 +54,7 @@ func (b *SlackBot) Start() {
 }
 
 func (b *SlackBot) showHelp(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
-
-	res := textConstants.Help
-	bot.Reply(evt, res, slackbot.WithoutTyping)
+	bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, textConstants.Help), slackbot.WithoutTyping)
 }
 
 func (b *SlackBot) showHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
@@ -63,7 +64,7 @@ func (b *SlackBot) showHandler(ctx context.Context, bot *slackbot.Bot, evt *slac
 func (b *SlackBot) unknownCommand(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	//checking is message written by bot
 	if evt.User != "" {
-		bot.Reply(evt, textConstants.UnknownCommand, slackbot.WithoutTyping)
+		bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, textConstants.UnknownCommand), slackbot.WithoutTyping)
 	}
 }
 
@@ -75,19 +76,19 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 	m[textConstants.HostIdKey] = args[len(args)-2]
 	response, err, httpCode := b.client.GetTransactionCount(m[textConstants.HostIdKey], m[textConstants.ProviderKey])
 	if err != nil {
-		bot.Reply(evt, "<@"+evt.User+"> "+textConstants.RequestErrorText, slackbot.WithoutTyping)
+		bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, response), slackbot.WithoutTyping)
 		return
 	}
 
 	switch httpCode {
 	case http.StatusInternalServerError:
 		{
-			bot.Reply(evt, "<@"+evt.User+"> "+textConstants.ServerErrorText, slackbot.WithoutTyping)
+			bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, textConstants.ServerErrorText), slackbot.WithoutTyping)
 			return
 		}
 	case http.StatusNotFound:
 		{
-			bot.Reply(evt, "<@"+evt.User+"> "+textConstants.UserDoesNotExistText, slackbot.WithoutTyping)
+			bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, textConstants.UserDoesNotExistText), slackbot.WithoutTyping)
 			return
 		}
 	}
@@ -95,7 +96,7 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 	m["response"] = response
 	m["user"] = evt.User
 	b.database.Save(m)
-	bot.Reply(evt, "<@"+evt.User+"> "+response, slackbot.WithoutTyping)
+	bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, response), slackbot.WithoutTyping)
 }
 
 func (b *SlackBot) getCustomersCountHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
@@ -107,19 +108,19 @@ func (b *SlackBot) getCustomersCountHandler(ctx context.Context, bot *slackbot.B
 	response, err, httpCode := b.client.GetUserCount(m[textConstants.HostIdKey], m[textConstants.ProviderKey])
 
 	if err != nil {
-		bot.Reply(evt, "<@"+evt.User+"> "+textConstants.RequestErrorText, slackbot.WithoutTyping)
+		bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, textConstants.RequestErrorText), slackbot.WithoutTyping)
 		return
 	}
 
 	switch httpCode {
 	case http.StatusInternalServerError:
 		{
-			bot.Reply(evt, "<@"+evt.User+"> "+textConstants.RequestErrorText, slackbot.WithoutTyping)
+			bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, textConstants.RequestErrorText), slackbot.WithoutTyping)
 			return
 		}
 	case http.StatusNotFound:
 		{
-			bot.Reply(evt, "<@"+evt.User+"> "+textConstants.UserDoesNotExistText, slackbot.WithoutTyping)
+			bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, textConstants.UserDoesNotExistText), slackbot.WithoutTyping)
 			return
 		}
 	}
@@ -127,7 +128,7 @@ func (b *SlackBot) getCustomersCountHandler(ctx context.Context, bot *slackbot.B
 	m["response"] = response
 	m["user"] = evt.User
 	b.database.Save(m)
-	bot.Reply(evt, "<@"+evt.User+"> "+response, slackbot.WithoutTyping)
+	bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, response), slackbot.WithoutTyping)
 }
 
 func (b *SlackBot) addLettersToUser(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
@@ -215,14 +216,14 @@ func (b *SlackBot) createScenarioByCampaign(ctx context.Context, bot *slackbot.B
 	switch httpCode {
 	case http.StatusCreated:
 		{
-			bot.Reply(evt, "Created!", slackbot.WithoutTyping)
+			bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, "created"), slackbot.WithoutTyping)
 		}
 	case http.StatusNotFound:
 		{
-			bot.Reply(evt, "Campaign doesn`t exist", slackbot.WithoutTyping)
+			bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, "Campaign doesn`t exist"), slackbot.WithoutTyping)
 		}
 	default:
-		bot.Reply(evt, "fail", slackbot.WithoutTyping)
+		bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, "fail"), slackbot.WithoutTyping)
 	}
 	m["user"] = evt.User
 	m["http_status_code"] = strconv.Itoa(httpCode)

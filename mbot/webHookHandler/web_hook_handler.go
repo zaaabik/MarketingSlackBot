@@ -145,13 +145,20 @@ func updateSendgridAnswer(w *http.ResponseWriter, callback *slack.AttachmentActi
 			(*w).Write([]byte(response))
 		}
 	case http.StatusNotFound:
-		response := fmt.Sprintf(answerToUserTemplate, user, textConstants.UserDoesNotExistText)
-		(*w).Write([]byte(response))
+		{
+			response := fmt.Sprintf(answerToUserTemplate, user, textConstants.UserDoesNotExistText)
+			(*w).Write([]byte(response))
+		}
 	case http.StatusInternalServerError:
-		response := fmt.Sprintf(answerToUserTemplate, user, textConstants.ServerErrorText)
-		(*w).Write([]byte(response))
+		{
+			response := fmt.Sprintf(answerToUserTemplate, user, textConstants.ServerErrorText)
+			(*w).Write([]byte(response))
+		}
 	default:
-		response := fmt.Sprintf(answerToUserTemplate, user, textConstants.RequestErrorText)
-		(*w).Write([]byte(response))
+		{
+			response := fmt.Sprintf(answerToUserTemplate, user, textConstants.RequestErrorText)
+			(*w).Write([]byte(response))
+
+		}
 	}
 }
