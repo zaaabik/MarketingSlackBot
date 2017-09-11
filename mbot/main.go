@@ -9,7 +9,7 @@ import (
 )
 
 var config struct {
-	BaseApiUrl     string `long:"base_url" env:"BASE_URL"`
+	BaseApiUrl     string `long:"base_api_url" env:"BASE_URL"`
 	BotUserToken   string `long:"bot_token" env:"BOT_TOKEN"`
 	DatabasePath   string `long:"db_path" env:"DB_PATH"`
 	HttpTokenValue string `long:"http_token_value" env:"HTTP_TOKEN_VALUE"`
