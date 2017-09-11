@@ -2,6 +2,7 @@ package marketingClient
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/radario/MarketingSlackBot/mbot/textConstants"
 	"io/ioutil"
 	"log"
@@ -9,18 +10,31 @@ import (
 	"net/url"
 )
 
+const methodTemplate = "%s%s"
+
 type MarketingClient struct {
-	baseApiUrl     string
-	httpTokenValue string
-	httpTokenKey   string
+	baseApiUrl                     string
+	httpTokenValue                 string
+	httpTokenKey                   string
+	getCustomersCountMethod        string
+	getTransactionCountMethod      string
+	addLettersToHostMethod         string
+	upgradeSendgridMethod          string
+	createScenarioByCampaignMethod string
 }
 
 func NewMarketingClient(apiUrl, tokenValue, tokenKey string) *MarketingClient {
-	return &MarketingClient{apiUrl, tokenValue, tokenKey}
+	client := &MarketingClient{baseApiUrl: apiUrl, httpTokenValue: tokenValue, httpTokenKey: tokenKey}
+	client.getCustomersCountMethod = fmt.Sprintf(methodTemplate, apiUrl, textConstants.GetCustomersCountMethod)
+	client.getTransactionCountMethod = fmt.Sprintf(methodTemplate, apiUrl, textConstants.GetCustomersTransactionMethod)
+	client.addLettersToHostMethod = fmt.Sprintf(methodTemplate, apiUrl, textConstants.AddUserLetterCountMethod)
+	client.upgradeSendgridMethod = fmt.Sprint(methodTemplate, apiUrl, textConstants.UpdateSendgridEmailMethod)
+	client.createScenarioByCampaignMethod = fmt.Sprint(methodTemplate, apiUrl, textConstants.CreateScenarioByCampaignMethod)
+	return client
 }
 
 func (client *MarketingClient) GetUserCount(userId string, provider string) (string, error, int) {
-	req, err := http.NewRequest("GET", client.baseApiUrl+textConstants.GetCustomersCountMethod, nil)
+	req, err := http.NewRequest("GET", client.getCustomersCountMethod, nil)
 	if err != nil {
 		return "", err, 0
 	}
@@ -45,7 +59,7 @@ func (client *MarketingClient) GetUserCount(userId string, provider string) (str
 }
 
 func (client *MarketingClient) GetTransactionCount(userId string, provider string) (string, error, int) {
-	req, err := http.NewRequest("GET", client.baseApiUrl+textConstants.GetCustomersTransactionMethod, nil)
+	req, err := http.NewRequest("GET", client.getTransactionCountMethod, nil)
 	if err != nil {
 		return "", err, 0
 	}
@@ -79,7 +93,7 @@ func (client *MarketingClient) AddLettersTohost(userId string, provider string, 
 	buffer := new(bytes.Buffer)
 	buffer.WriteString(form.Encode())
 
-	req, err := http.NewRequest("PUT", client.baseApiUrl+textConstants.AddUserLetterCountMethod, buffer)
+	req, err := http.NewRequest("PUT", client.addLettersToHostMethod, buffer)
 	if err != nil {
 		log.Print(err)
 		return http.StatusOK, err
@@ -105,7 +119,7 @@ func (client *MarketingClient) UpdateSendgridEmail(userId string, provider strin
 	buffer.WriteString(form.Encode())
 
 	log.Println(form.Encode())
-	req, err := http.NewRequest("PUT", client.baseApiUrl+textConstants.UpdateSendgridEmailMethod, buffer)
+	req, err := http.NewRequest("PUT", client.upgradeSendgridMethod, buffer)
 	if err != nil {
 		log.Print(err)
 		return http.StatusOK, err
@@ -130,7 +144,7 @@ func (client *MarketingClient) CreateScenarioByCampaign(campaignId string, scena
 	buffer := new(bytes.Buffer)
 	buffer.WriteString(form.Encode())
 
-	req, err := http.NewRequest("PUT", client.baseApiUrl+textConstants.CreateScenarioByCampaignMethod, buffer)
+	req, err := http.NewRequest("PUT", client.createScenarioByCampaignMethod, buffer)
 	if err != nil {
 		log.Print(err)
 		return http.StatusOK, err
