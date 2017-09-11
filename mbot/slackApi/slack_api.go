@@ -95,7 +95,10 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 
 	m["response"] = response
 	m["user"] = evt.User
-	b.database.Save(m)
+	err = b.database.Save(m)
+	if err != nil {
+		log.Print(err)
+	}
 	bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, response), slackbot.WithoutTyping)
 }
 
@@ -127,7 +130,10 @@ func (b *SlackBot) getCustomersCountHandler(ctx context.Context, bot *slackbot.B
 
 	m["response"] = response
 	m["user"] = evt.User
-	b.database.Save(m)
+	err = b.database.Save(m)
+	if err != nil {
+		log.Print(err)
+	}
 	bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, response), slackbot.WithoutTyping)
 }
 
@@ -228,7 +234,10 @@ func (b *SlackBot) createScenarioByCampaign(ctx context.Context, bot *slackbot.B
 	m["user"] = evt.User
 	m["http_status_code"] = strconv.Itoa(httpCode)
 	m["method"] = textConstants.CreateScenarioByCampaignMethod
-	b.database.Save(m)
+	err = b.database.Save(m)
+	if err != nil {
+		log.Print(err)
+	}
 }
 
 func (b *SlackBot) delDbHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
