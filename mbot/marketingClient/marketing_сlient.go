@@ -33,10 +33,10 @@ func NewMarketingClient(apiUrl, tokenValue, tokenKey string) *MarketingClient {
 	return client
 }
 
-func (client *MarketingClient) GetUserCount(userId string, provider string) (string, error, int) {
+func (client *MarketingClient) GetUserCount(userId string, provider string) (string, int, error) {
 	req, err := http.NewRequest("GET", client.getCustomersCountMethod, nil)
 	if err != nil {
-		return "", err, 0
+		return "", 0, err
 	}
 
 	req.Header.Add("X-MARKETING-SECURITY", client.httpTokenValue)
@@ -46,22 +46,22 @@ func (client *MarketingClient) GetUserCount(userId string, provider string) (str
 	req.URL.RawQuery = q.Encode()
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", err, 0
+		return "", 0, err
 	}
 
 	body, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {
-		return "", err, 0
+		return "", 0, err
 	}
 
-	return string(body), nil, response.StatusCode
+	return string(body), response.StatusCode, nil
 }
 
-func (client *MarketingClient) GetTransactionCount(userId string, provider string) (string, error, int) {
+func (client *MarketingClient) GetTransactionCount(userId string, provider string) (string, int, error) {
 	req, err := http.NewRequest("GET", client.getTransactionCountMethod, nil)
 	if err != nil {
-		return "", err, 0
+		return "", 0, err
 	}
 
 	req.Header.Add("X-MARKETING-SECURITY", client.httpTokenValue)
@@ -72,19 +72,19 @@ func (client *MarketingClient) GetTransactionCount(userId string, provider strin
 	log.Print(q)
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", err, 0
+		return "", 0, err
 	}
 
 	body, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {
-		return "", err, 0
+		return "", 0, err
 	}
 
-	return string(body), nil, response.StatusCode
+	return string(body), response.StatusCode, nil
 }
 
-func (client *MarketingClient) AddLettersTohost(userId string, provider string, lettersCount string) (int, error) {
+func (client *MarketingClient) AddLettersToHost(userId string, provider string, lettersCount string) (int, error) {
 	form := url.Values{}
 	form.Set(textConstants.HostIdKey, userId)
 	form.Set(textConstants.ProviderKey, provider)
