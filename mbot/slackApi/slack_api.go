@@ -20,7 +20,7 @@ import (
 	"strings"
 )
 
-const answerToUserTemplate = "<%s> %s"
+const answerToUserTemplate = "<@%s> %s"
 
 type SlackBot struct {
 	server   *webHookHandler.WebHook
@@ -74,7 +74,7 @@ func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot
 	m["method"] = textConstants.GetCustomersTransactionMethod
 	m[textConstants.ProviderKey] = args[len(args)-1]
 	m[textConstants.HostIdKey] = args[len(args)-2]
-	response, err, httpCode := b.client.GetTransactionCount(m[textConstants.HostIdKey], m[textConstants.ProviderKey])
+	response, httpCode, err := b.client.GetTransactionCount(m[textConstants.HostIdKey], m[textConstants.ProviderKey])
 	if err != nil {
 		bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, response), slackbot.WithoutTyping)
 		return
@@ -105,7 +105,7 @@ func (b *SlackBot) getCustomersCountHandler(ctx context.Context, bot *slackbot.B
 	m["method"] = textConstants.GetCustomersCountMethod
 	m[textConstants.ProviderKey] = args[len(args)-1]
 	m[textConstants.HostIdKey] = args[len(args)-2]
-	response, err, httpCode := b.client.GetUserCount(m[textConstants.HostIdKey], m[textConstants.ProviderKey])
+	response, httpCode, err := b.client.GetUserCount(m[textConstants.HostIdKey], m[textConstants.ProviderKey])
 
 	if err != nil {
 		bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, textConstants.RequestErrorText), slackbot.WithoutTyping)
