@@ -147,7 +147,7 @@ func (client *MarketingClient) CreateScenarioByCampaign(campaignId string, scena
 	req, err := http.NewRequest("PUT", client.createScenarioByCampaignMethod, buffer)
 	if err != nil {
 		log.Print(err)
-		return http.StatusOK, err
+		return http.StatusInternalServerError, err
 	}
 
 	req.Header.Add(client.httpTokenKey, client.httpTokenValue)
