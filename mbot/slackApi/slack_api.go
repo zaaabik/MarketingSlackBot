@@ -278,7 +278,7 @@ func (b *SlackBot) updateSendgridEmail(ctx context.Context, bot *slackbot.Bot, e
 func (b *SlackBot) createScenarioByCampaign(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	args := strings.Fields(evt.Text)
 	id := strings.Split(args[len(args)-1], "/")
-	campaignId := (id[len(id)-1])
+	campaignId := id[len(id)-1]
 	result := strings.Replace(campaignId, ">", "", -1)
 	m := make(map[string]string)
 	m[textConstants.ScenarioName] = args[len(args)-2]

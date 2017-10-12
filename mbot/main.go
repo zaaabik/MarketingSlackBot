@@ -1,7 +1,7 @@
 package main
 
 import (
-	flags "github.com/jessevdk/go-flags"
+	"github.com/jessevdk/go-flags"
 	"github.com/radario/MarketingSlackBot/mbot/db"
 	"github.com/radario/MarketingSlackBot/mbot/marketingClient"
 	"github.com/radario/MarketingSlackBot/mbot/slackApi"
