@@ -9,5 +9,7 @@ const (
 	ShowDbRegExp                  = `\.show`
 	DeleteDbRegExp                = `\.del`
 	HelpRegExp                    = `((<@\w+>\s*)+|(^\s*))(\.help)`
+	LockUserExp                   = `((<@\w+>\s*)+|(^\s*))(\.lock \w+ \w+\s*$)`
+	UnlockUserExp                 = `((<@\w+>\s*)+|(^\s*))(\.unlock \w+ \w+\s*$)`
 	AllRegExp                     = `.*`
 )
