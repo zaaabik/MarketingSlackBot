@@ -68,7 +68,7 @@ func (b *SlackBot) unknownCommand(ctx context.Context, bot *slackbot.Bot, evt *s
 func (b *SlackBot) UnlockUserHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
-	m["method"] = textConstants.UnlockUserMethod
+	m["method"] = textConstants.Unlock
 	m[textConstants.ProviderKey] = args[len(args)-1]
 	m[textConstants.HostIdKey] = args[len(args)-2]
 	httpCode, err := b.client.UnlockUser(m[textConstants.HostIdKey], m[textConstants.ProviderKey], false)
@@ -136,6 +136,7 @@ func (b *SlackBot) LockUserHandler(ctx context.Context, bot *slackbot.Bot, evt *
 func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	args := strings.Fields(evt.Text)
 	m := make(map[string]string)
+	m["method"] = textConstants.GetCustomersTransactionMethod
 	m["method"] = textConstants.GetCustomersTransactionMethod
 	m[textConstants.ProviderKey] = args[len(args)-1]
 	m[textConstants.HostIdKey] = args[len(args)-2]

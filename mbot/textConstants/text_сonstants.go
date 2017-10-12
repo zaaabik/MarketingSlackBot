@@ -26,6 +26,7 @@ const (
 	ScenarioName    = "name"
 	CampaignId      = "id"
 	Lock            = "lock"
+	Unlock          = "unlock"
 
 	AddUserLetterCountMethod       = "user/letters_count"
 	GetCustomersCountMethod        = "customers/count"
