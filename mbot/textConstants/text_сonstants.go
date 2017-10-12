@@ -22,10 +22,13 @@ const (
 	EmailKey        = "email"
 	ScenarioName    = "name"
 	CampaignId      = "id"
+	Lock            = "lock"
 
 	AddUserLetterCountMethod       = "user/letters_count"
 	GetCustomersCountMethod        = "customers/count"
 	GetCustomersTransactionMethod  = "customer_transactions/count"
 	UpdateSendgridEmailMethod      = "user/sendgrid"
 	CreateScenarioByCampaignMethod = "scenario"
+	LockUserMethod                 = "user/lock_state"
+	UnlockUserMethod               = "user/lock_state"
 )

@@ -49,6 +49,8 @@ func (b *SlackBot) Start() {
 	toMe.Hear(regularExpression.ShowDbRegExp).MessageHandler(b.showHandler)
 	toMe.Hear(regularExpression.DeleteDbRegExp).MessageHandler(b.delDbHandler)
 	toMe.Hear(regularExpression.HelpRegExp).MessageHandler(b.showHelp)
+	toMe.Hear(regularExpression.UnlockUserExp).MessageHandler(b.UnlockUserHandler)
+	toMe.Hear(regularExpression.LockUserExp).MessageHandler(b.LockUserHandler)
 	toMe.Hear(regularExpression.AllRegExp).MessageHandler(b.unknownCommand)
 	bot.Run()
 }
@@ -66,6 +68,74 @@ func (b *SlackBot) unknownCommand(ctx context.Context, bot *slackbot.Bot, evt *s
 	if evt.User != "" {
 		bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, textConstants.UnknownCommand), slackbot.WithoutTyping)
 	}
+}
+
+func (b *SlackBot) UnlockUserHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
+	args := strings.Fields(evt.Text)
+	m := make(map[string]string)
+	m["method"] = textConstants.UnlockUserMethod
+	m[textConstants.ProviderKey] = args[len(args)-1]
+	m[textConstants.HostIdKey] = args[len(args)-2]
+	httpCode, err := b.client.UnlockUser(m[textConstants.HostIdKey], m[textConstants.ProviderKey], false)
+
+	if err != nil {
+		bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, textConstants.RequestErrorText), slackbot.WithoutTyping)
+		return
+	}
+
+	switch httpCode {
+	case http.StatusInternalServerError:
+		{
+			bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, textConstants.RequestErrorText), slackbot.WithoutTyping)
+			return
+		}
+	case http.StatusNotFound:
+		{
+			bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, textConstants.UserDoesNotExistText), slackbot.WithoutTyping)
+			return
+		}
+	}
+
+	m["user"] = evt.User
+	err = b.database.Save(m)
+	if err != nil {
+		log.Print(err)
+	}
+	bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, "ok"), slackbot.WithoutTyping)
+}
+
+func (b *SlackBot) LockUserHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
+	args := strings.Fields(evt.Text)
+	m := make(map[string]string)
+	m["method"] = textConstants.Lock
+	m[textConstants.ProviderKey] = args[len(args)-1]
+	m[textConstants.HostIdKey] = args[len(args)-2]
+	httpCode, err := b.client.LockUser(m[textConstants.HostIdKey], m[textConstants.ProviderKey], true)
+
+	if err != nil {
+		bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, textConstants.RequestErrorText), slackbot.WithoutTyping)
+		return
+	}
+
+	switch httpCode {
+	case http.StatusInternalServerError:
+		{
+			bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, textConstants.RequestErrorText), slackbot.WithoutTyping)
+			return
+		}
+	case http.StatusNotFound:
+		{
+			bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, textConstants.UserDoesNotExistText), slackbot.WithoutTyping)
+			return
+		}
+	}
+
+	m["user"] = evt.User
+	err = b.database.Save(m)
+	if err != nil {
+		log.Print(err)
+	}
+	bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, "ok"), slackbot.WithoutTyping)
 }
 
 func (b *SlackBot) getTransactionCountHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
