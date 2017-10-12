@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-const collectionName = "requests"
-const dbName = "logs"
+const collectionName = "logs"
+const dbName = "marketingSlackBot"
 
 type MongoDb struct {
 	session *mgo.Session
