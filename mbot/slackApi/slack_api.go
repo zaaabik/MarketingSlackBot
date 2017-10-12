@@ -46,7 +46,6 @@ func (b *SlackBot) Start() {
 	toMe.Hear(regularExpression.GetCustomersCountRegExp).MessageHandler(b.getCustomersCountHandler)
 	toMe.Hear(regularExpression.UpdateSendgridEmailRegExp).MessageHandler(b.updateSendgridEmail)
 	toMe.Hear(regularExpression.CreateScenarioByCompainRegExp).MessageHandler(b.createScenarioByCampaign)
-	toMe.Hear(regularExpression.DeleteDbRegExp).MessageHandler(b.delDbHandler)
 	toMe.Hear(regularExpression.HelpRegExp).MessageHandler(b.showHelp)
 	toMe.Hear(regularExpression.UnlockUserExp).MessageHandler(b.UnlockUserHandler)
 	toMe.Hear(regularExpression.LockUserExp).MessageHandler(b.LockUserHandler)
