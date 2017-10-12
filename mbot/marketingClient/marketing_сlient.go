@@ -73,7 +73,6 @@ func (client *MarketingClient) GetTransactionCount(userId string, provider strin
 	q.Add(textConstants.HostIdKey, userId)
 	q.Add(textConstants.ProviderKey, provider)
 	req.URL.RawQuery = q.Encode()
-	log.Print(q)
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", 0, err
@@ -122,7 +121,6 @@ func (client *MarketingClient) UpdateSendgridEmail(userId string, provider strin
 	buffer := new(bytes.Buffer)
 	buffer.WriteString(form.Encode())
 
-	log.Println(form.Encode())
 	req, err := http.NewRequest("PUT", client.upgradeSendgridMethod, buffer)
 	if err != nil {
 		log.Print(err)
@@ -149,7 +147,6 @@ func (client *MarketingClient) LockUser(userId string, provider string, lock boo
 	buffer := new(bytes.Buffer)
 	buffer.WriteString(form.Encode())
 
-	log.Println(form.Encode())
 	req, err := http.NewRequest("POST", client.lockUserMethod, buffer)
 	if err != nil {
 		log.Print(err)
@@ -176,7 +173,6 @@ func (client *MarketingClient) UnlockUser(userId string, provider string, lock b
 	buffer := new(bytes.Buffer)
 	buffer.WriteString(form.Encode())
 
-	log.Println(form.Encode())
 	req, err := http.NewRequest("POST", client.unlockUserMethod, buffer)
 	if err != nil {
 		log.Print(err)
