@@ -23,8 +23,8 @@ const (
 	ProviderKey     = "provider"
 	LettersCountKey = "letters_count"
 	EmailKey        = "email"
-	ScenarioName    = "name"
-	CampaignId      = "id"
+	ScenarioName    = "scenario_name"
+	CampaignId      = "campign_id"
 	Lock            = "lock"
 	Unlock          = "unlock"
 
