@@ -11,7 +11,7 @@ import (
 var config struct {
 	BaseApiUrl     string `long:"base_api_url" env:"BASE_URL"`
 	BotUserToken   string `long:"bot_token" env:"BOT_TOKEN"`
-	DatabasePath   string `long:"db_path" env:"DB_PATH"`
+	Host           string `long:"db_host" env:"DB_HOST"`
 	HttpTokenValue string `long:"http_token_value" env:"HTTP_TOKEN_VALUE"`
 	HttpTokenKey   string `long:"http_token_key" env:"HTTP_TOKEN_KEY"`
 }
@@ -28,11 +28,11 @@ func main() {
 		os.Exit(WrongFlagsExitCode)
 	}
 	var database db.Store
-	database, err := db.NewMongoDb(config.DatabasePath)
-	defer database.Close()
+	database, err := db.NewMongoDb(config.Host)
 	if err != nil {
 		os.Exit(CantCreateDatabaseExitCode)
 	}
+	defer database.Close()
 	client := marketingClient.NewMarketingClient(config.BaseApiUrl, config.HttpTokenValue, config.HttpTokenKey)
 	bot := slackApi.NewBot(config.BotUserToken, &database, client)
 	bot.Start()
