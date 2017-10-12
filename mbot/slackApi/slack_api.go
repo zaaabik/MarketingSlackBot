@@ -288,6 +288,10 @@ func (b *SlackBot) createScenarioByCampaign(ctx context.Context, bot *slackbot.B
 	case http.StatusCreated:
 		{
 			bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, "created"), slackbot.WithoutTyping)
+			m["user"] = evt.User
+			m["http_status_code"] = strconv.Itoa(httpCode)
+			m["method"] = textConstants.CreateScenarioByCampaignMethod
+			err = b.database.Save(m)
 		}
 	case http.StatusNotFound:
 		{
@@ -296,10 +300,7 @@ func (b *SlackBot) createScenarioByCampaign(ctx context.Context, bot *slackbot.B
 	default:
 		bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, "fail"), slackbot.WithoutTyping)
 	}
-	m["user"] = evt.User
-	m["http_status_code"] = strconv.Itoa(httpCode)
-	m["method"] = textConstants.CreateScenarioByCampaignMethod
-	err = b.database.Save(m)
+
 	if err != nil {
 		log.Print(err)
 	}
