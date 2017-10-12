@@ -21,6 +21,8 @@ type MarketingClient struct {
 	addLettersToHostMethod         string
 	upgradeSendgridMethod          string
 	createScenarioByCampaignMethod string
+	unlockUserMethod               string
+	lockUserMethod                 string
 }
 
 func NewMarketingClient(apiUrl, tokenValue, tokenKey string) *MarketingClient {
@@ -28,8 +30,10 @@ func NewMarketingClient(apiUrl, tokenValue, tokenKey string) *MarketingClient {
 	client.getCustomersCountMethod = fmt.Sprintf(methodTemplate, apiUrl, textConstants.GetCustomersCountMethod)
 	client.getTransactionCountMethod = fmt.Sprintf(methodTemplate, apiUrl, textConstants.GetCustomersTransactionMethod)
 	client.addLettersToHostMethod = fmt.Sprintf(methodTemplate, apiUrl, textConstants.AddUserLetterCountMethod)
-	client.upgradeSendgridMethod = fmt.Sprint(methodTemplate, apiUrl, textConstants.UpdateSendgridEmailMethod)
-	client.createScenarioByCampaignMethod = fmt.Sprint(methodTemplate, apiUrl, textConstants.CreateScenarioByCampaignMethod)
+	client.upgradeSendgridMethod = fmt.Sprintf(methodTemplate, apiUrl, textConstants.UpdateSendgridEmailMethod)
+	client.createScenarioByCampaignMethod = fmt.Sprintf(methodTemplate, apiUrl, textConstants.CreateScenarioByCampaignMethod)
+	client.unlockUserMethod = fmt.Sprintf(methodTemplate, apiUrl, textConstants.UnlockUserMethod)
+	client.lockUserMethod = fmt.Sprintf(methodTemplate, apiUrl, textConstants.LockUserMethod)
 	return client
 }
 
@@ -120,6 +124,60 @@ func (client *MarketingClient) UpdateSendgridEmail(userId string, provider strin
 
 	log.Println(form.Encode())
 	req, err := http.NewRequest("PUT", client.upgradeSendgridMethod, buffer)
+	if err != nil {
+		log.Print(err)
+		return http.StatusOK, err
+	}
+
+	req.Header.Add(client.httpTokenKey, client.httpTokenValue)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	response, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Print(err)
+		return 0, err
+	}
+
+	return response.StatusCode, nil
+}
+
+func (client *MarketingClient) LockUser(userId string, provider string, lock bool) (int, error) {
+	form := url.Values{}
+	form.Set(textConstants.HostIdKey, userId)
+	form.Set(textConstants.ProviderKey, provider)
+	form.Set(textConstants.Lock, "true")
+
+	buffer := new(bytes.Buffer)
+	buffer.WriteString(form.Encode())
+
+	log.Println(form.Encode())
+	req, err := http.NewRequest("POST", client.lockUserMethod, buffer)
+	if err != nil {
+		log.Print(err)
+		return http.StatusOK, err
+	}
+
+	req.Header.Add(client.httpTokenKey, client.httpTokenValue)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	response, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Print(err)
+		return 0, err
+	}
+
+	return response.StatusCode, nil
+}
+
+func (client *MarketingClient) UnlockUser(userId string, provider string, lock bool) (int, error) {
+	form := url.Values{}
+	form.Set(textConstants.HostIdKey, userId)
+	form.Set(textConstants.ProviderKey, provider)
+	form.Set(textConstants.Lock, "false")
+
+	buffer := new(bytes.Buffer)
+	buffer.WriteString(form.Encode())
+
+	log.Println(form.Encode())
+	req, err := http.NewRequest("POST", client.unlockUserMethod, buffer)
 	if err != nil {
 		log.Print(err)
 		return http.StatusOK, err
