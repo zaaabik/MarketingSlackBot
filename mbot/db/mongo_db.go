@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"gopkg.in/mgo.v2"
 	"time"
 )

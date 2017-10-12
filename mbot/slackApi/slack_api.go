@@ -46,7 +46,6 @@ func (b *SlackBot) Start() {
 	toMe.Hear(regularExpression.GetCustomersCountRegExp).MessageHandler(b.getCustomersCountHandler)
 	toMe.Hear(regularExpression.UpdateSendgridEmailRegExp).MessageHandler(b.updateSendgridEmail)
 	toMe.Hear(regularExpression.CreateScenarioByCompainRegExp).MessageHandler(b.createScenarioByCampaign)
-	toMe.Hear(regularExpression.ShowDbRegExp).MessageHandler(b.showHandler)
 	toMe.Hear(regularExpression.DeleteDbRegExp).MessageHandler(b.delDbHandler)
 	toMe.Hear(regularExpression.HelpRegExp).MessageHandler(b.showHelp)
 	toMe.Hear(regularExpression.UnlockUserExp).MessageHandler(b.UnlockUserHandler)
@@ -57,10 +56,6 @@ func (b *SlackBot) Start() {
 
 func (b *SlackBot) showHelp(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	bot.Reply(evt, fmt.Sprintf(answerToUserTemplate, evt.User, textConstants.Help), slackbot.WithoutTyping)
-}
-
-func (b *SlackBot) showHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
-	b.database.GetAll()
 }
 
 func (b *SlackBot) unknownCommand(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
