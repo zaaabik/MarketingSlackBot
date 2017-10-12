@@ -14,6 +14,9 @@ const (
 	.get customers count [host id] [provider]
 	.set sendgrid email [new email] to [host id] [provider]
 	.create scenario [scenario name] [link to company]
+	.lock [host id] [provider]
+	.unlock [host id] [provider]
+
 	example .add 1234 letters 13 radario`
 
 	HostIdKey       = "host_id"
