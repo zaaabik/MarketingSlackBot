@@ -82,7 +82,7 @@ func (web WebHook) updateSendgridEmail(value string) int {
 	if err != nil {
 		return 0
 	}
-	if statusCode == http.StatusOK {
+	if statusCode == http.StatusCreated {
 		m := make(map[string]string)
 		m["method"] = textConstants.UpdateSendgridEmailMethod
 		m[textConstants.ProviderKey] = valueJson.Provider
