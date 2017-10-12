@@ -26,10 +26,6 @@ func NewWebHookHandler(client *marketingClient.MarketingClient, database db.Stor
 	return &WebHook{client, database}
 }
 
-type j struct {
-	Value []slack.Attachment `json:"attachments"`
-}
-
 func (web WebHook) Start() {
 	r := chi.NewRouter()
 	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
