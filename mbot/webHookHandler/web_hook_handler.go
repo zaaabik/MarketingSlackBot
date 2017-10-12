@@ -140,7 +140,7 @@ func updateSendgridAnswer(w *http.ResponseWriter, callback *slack.AttachmentActi
 	switch httpCode {
 	case http.StatusCreated:
 		{
-			response := fmt.Sprintf(answerToUserTemplate, user, textConstants.ApproveEventText)
+			response := fmt.Sprintf(answerToUserTemplate, user, textConstants.EmailChanged)
 			(*w).Write([]byte(response))
 		}
 	case http.StatusNotFound:
