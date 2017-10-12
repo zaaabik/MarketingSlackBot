@@ -39,15 +39,6 @@ func (mongo *MongoDb) Save(m map[string]string) error {
 	return err
 }
 
-func (mongo *MongoDb) GetAll() {
-	collection := mongo.session.DB(dbName).C(collectionName)
-	var result []map[string]string
-	collection.Find(nil).All(&result)
-	for _, v := range result {
-		fmt.Print(v)
-	}
-}
-
 func (mongo *MongoDb) DeleteAll() {
 	collection := mongo.session.DB(dbName).C(collectionName)
 	collection.RemoveAll(nil)
