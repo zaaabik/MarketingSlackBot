@@ -28,7 +28,7 @@ func main() {
 		os.Exit(WrongFlagsExitCode)
 	}
 	var database db.Store
-	database, err := db.NewBoltDb(config.DatabasePath)
+	database, err := db.NewMongoDb(config.DatabasePath)
 	defer database.Close()
 	if err != nil {
 		os.Exit(CantCreateDatabaseExitCode)
