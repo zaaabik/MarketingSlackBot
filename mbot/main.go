@@ -5,6 +5,7 @@ import (
 	"github.com/radario/MarketingSlackBot/mbot/db"
 	"github.com/radario/MarketingSlackBot/mbot/marketingClient"
 	"github.com/radario/MarketingSlackBot/mbot/slackApi"
+	"log"
 	"os"
 )
 
@@ -23,13 +24,16 @@ const (
 
 func main() {
 	flags.Parse(&config)
+	log.Print("started!")
 	if config.HttpTokenKey == "" || config.BotUserToken == "" ||
 		config.BaseApiUrl == "" {
 		os.Exit(WrongFlagsExitCode)
+		log.Print("exit with 1 status!")
 	}
 	var database db.Store
 	database, err := db.NewMongoDb(config.Host)
 	if err != nil {
+		log.Print("dbproblems")
 		os.Exit(CantCreateDatabaseExitCode)
 	}
 	defer database.Close()
